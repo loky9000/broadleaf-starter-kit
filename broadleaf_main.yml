@@ -79,8 +79,8 @@ application:
           required: [db-manage, app-manage, lb-manage, db-info, app-output]
           configuration:
           # input.db-sql-url: ["https://raw.github.com/qubell-bazaar/component-petclinic/master/sql/petclinic-mysql-schema.sql", "https://raw.github.com/qubell-bazaar/component-petclinic/master/sql/petclinic-mysql-dataload.sql"]
-            input.db-user: root
-            input.db-password: #const
+            input.db-user: broadleaf
+            input.db-password: broadleaf #const
             input.privileges: ["all"] #const
             input.scm-provider: git #const
             input.lib-uri: ["http://repo1.maven.org/maven2/org/apache/tomcat/dbcp/6.0.26/dbcp-6.0.26.jar", "http://repo1.maven.org/maven2/mysql/mysql-connector-java/5.1.6/mysql-connector-java-5.1.6.jar"]
