@@ -269,7 +269,7 @@ application:
                         command: build-app
                         arguments:
                           scm-provider: "{$.scm-provider}"
-                          git-uri: "git://github.com/{$.app-fork}/.git"
+                          git-uri: "git://github.com/{$.app-fork}/DemoSite.git"
                           app-branch: "{$.app-branch}"
                   - deploy-libs:
                       action: serviceCall
@@ -346,7 +346,7 @@ application:
                         command: build-app
                         arguments:
                           scm-provider: "{$.scm-provider}"
-                          git-uri: "git://github.com/{$.app-fork}/BroadleafCommerce.git"
+                          git-uri: "git://github.com/{$.app-fork}/DemoSite.git"
                           app-branch: "{$.app-branch}"
                   - deploy-libs:
                       action: serviceCall
