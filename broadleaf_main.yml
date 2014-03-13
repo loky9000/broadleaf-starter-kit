@@ -61,12 +61,14 @@ application:
               db-port: consume-signal(string)
             db-manage:
               create-db: send-command(string db-name)
-          #   change-grants: send-command(list<string> app-hosts, string db-name, string db-user, string db-password, list<string> privileges)
+              change-grants: send-command(list<string> app-hosts, string db-name, string db-user, string db-password, list<string> privileges)
           #    run-sql: send-command(string db-name, list<string> sql-url)
             app-manage:
               build-app: send-command(string scm-provider, string git-uri, string app-branch)
               deploy-libs: send-command(list<string> lib-uri)
               deploy-war: send-command(string war-uri, object context-attrs, object context-nodes)
+              reconfigure: send-command(string java-opts)
+              manage-service: send-command(string service-action)
             app-output:
               app-hosts: consume-signal(list<string>)
               app-port: consume-signal(string)
@@ -89,6 +91,7 @@ application:
             input.lbstats-stats-pass: pa55w0rd
             input.lbstats-stats-port: "1926"
             input.lbstats-stats-url: "/admin?stats"
+#            input.java_opts: "-Djava.awt.headless=true -Xmx256m -XX:+UseConcMarkSweepGC -Ddatabase.driver=com.mysql.jdbc.Driver -Ddatabase.url=jdbc:mysql://{$.props.db-info.db-host[0]}:{$.props.db-info.db-port}/{$.db-name}?autoReconnect=true -Ddatabase.user=broadleaf -Ddatabase.password=broadleaf"
 
             configuration.triggers:
               app-output.app-hosts: app-scale
@@ -127,7 +130,7 @@ application:
                   - lbstats-stats-port: &lbstats-stats-port
                       description: lb statistic port
                   - lbstats-stats-url: &lbstats-stats-url
-                      description: lb statistic's url
+                      description: lb statistic's url_
                 steps:
                   - get-env-props:
                       action: getEnvironmentProperties
@@ -157,6 +160,7 @@ application:
                           db-name: "{$.db-name}"
                           db-user: "{$.db-user}"
                           db-password: "{$.db-password}"
+                          privileges: "{$.privileges}"
                   - build-app:   
                       action: serviceCall
                       phase: build-app
@@ -179,10 +183,30 @@ application:
                         command: deploy-libs
                         arguments:
                           lib-uri: "{$.lib-uri}"
+                  - reconfigure-tomcat:
+                      action: serviceCall
+                      phase: reconfigure-tomcat
+                      precedingPhases: [ deploy-libs ]
+                      parameters:
+                        timeout: 300
+                        service: app-manage
+                        command: reconfigure
+                        arguments:
+                          java-opts: "-Djava.awt.headless=true -Xmx256m -XX:+UseConcMarkSweepGC -Ddatabase.driver=com.mysql.jdbc.Driver -Ddatabase.url=jdbc:mysql://{$.props.db-info.db-host[0]}:{$.props.db-info.db-port}/{$.db-name}?autoReconnect=true -Ddatabase.user=broadleaf -Ddatabase.password=broadleaf"
+                  - restart-tomcat:
+                      action: serviceCall
+                      phase: restart-tomcat
+                      precedingPhases: [ reconfigure-tomcat ]
+                      parameters:
+                        timeout: 300
+                        service: app-manage
+                        command: manage-service
+                        arguments:
+                          service-action: "restart"
                   - deploy-war:
                       action: serviceCall
                       phase: deploy-war
-                      precedingPhases: [ build-app, deploy-libs ]
+                      precedingPhases: [ build-app, deploy-libs, reconfigure-tomcat, restart-tomcat ]
                       parameters:
                         timeout: 300
                         service: app-manage
@@ -411,7 +435,7 @@ application:
           db-root-password: configuration(string)
         management:
           create-db: receive-command(string db-name)
-          run-sql: receive-command(string db-name, list<string> sql-url)
+          #run-sql: receive-command(string db-name, list<string> sql-url)
           change-grants: receive-command(list<string> app-hosts, string db-name, string db-user, string db-password, list<string> privileges)
         output:
           dbms: publish-signal(object)
@@ -421,15 +445,16 @@ application:
     app:
       type: reference.Submodule
       configuration:
-        __locator.application-id: "tomcat_component"
+        __locator.application-id: "532036ffe4b013e85a2a5016"
       interfaces:
         input:
           quantity: configuration(string)
-          java_opts: configuration(string)
         management:
           build-app: receive-command(string scm-provider, string git-uri, string app-branch)
           deploy-libs: receive-command(list<string> lib-uri)
           deploy-war: receive-command(string war-uri, object context-attrs, object context-nodes)
+          reconfigure: receive-command(string java-opts)
+          service-manage: receive-command(string service-action)
         output:
           app-hosts: publish-signal(list<string>)
           app-port: publish-signal(string)
