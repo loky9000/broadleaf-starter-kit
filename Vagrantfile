@@ -1,13 +1,20 @@
-Vagrant::Config.run do |config|
-    config.vm.box = "centos_6_x64"
-    config.vm.box_url = "http://developer.nrel.gov/downloads/vagrant-boxes/CentOS-6.4-x86_64-v20130731.box"
-    config.vm.forward_port 8080, 8080
-    config.ssh.timeout = 300
+VAGRANTFILE_API_VERSION = "2"
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
-    config.vm.provision :chef_solo do |chef|
-      chef.roles_path = "chef-repo/roles"
-#      chef.log_level = :debug
-      chef.cookbooks_path = "cookbooks"
+  #Ubuntu 12.04
+  config.vm.define "ubuntu12" do |ubuntu12_config|
+    ubuntu12_config.vm.box = "ubuntu-12-x64"
+    ubuntu12_config.vm.box_url = "http://s3.amazonaws.com/vagrant-bx/ubuntu-12-x64.box"
+    ubuntu12_config.vm.hostname = "ubuntu12.qubell.int"
+    ubuntu12_config.vm.network "forwarded_port", guest: 8080, host: 8080, auto_correct: true
+    ubuntu12_config.vm.network "forwarded_port", guest: 8090, host: 8090, auto_correct: true
+    ubuntu12_config.vm.provider :virtualbox do |vb|
+      vb.customize ["modifyvm", :id, "--memory", "2048"]
+      vb.customize ["modifyvm", :id, "--cpus", "2"]
+    end
+    ubuntu12_config.vm.provision "chef_solo" do |chef| 
+      chef.log_level = "debug"
+      chef.cookbooks_path = ["cookbooks"]
       chef.add_recipe "tomcat-component"
       chef.add_recipe "tomcat-component::deploy_war"
         chef.json = {
@@ -19,4 +26,6 @@ Vagrant::Config.run do |config|
           }
         }
     end
+ end
 end
+
