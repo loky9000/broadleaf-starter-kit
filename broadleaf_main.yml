@@ -2,7 +2,7 @@ application:
   configuration:
     input.db-name: broadleaf
     input.lb-bucket: http://roundrobin:80
-    input.app-fork: BroadleafCommerce
+    input.app-fork: loky9000
     input.app-branch: HEAD #red, master
     input.app-quantity: "1"
 
@@ -51,6 +51,7 @@ application:
               privileges: configuration(list<string>)
               lib-uri: configuration(list<string>)
               war-uri: configuration(string)
+              create-context: configuration(bool)
               lbstats-stats-user: configuration(string)
               lbstats-stats-pass: configuration(string)
               lbstats-stats-port: configuration(string)
@@ -66,7 +67,7 @@ application:
             app-manage:
               build-app: send-command(string scm-provider, string git-uri, string app-branch)
               deploy-libs: send-command(list<string> lib-uri)
-              deploy-war: send-command(string war-uri, object context-attrs, object context-nodes)
+              deploy-war: send-command(string war-uri, bool create-context, object context-attrs, object context-nodes)
               reconfigure: send-command(string java-opts)
               manage-service: send-command(string service-action)
             app-output:
@@ -87,11 +88,12 @@ application:
             input.scm-provider: git #const
             input.lib-uri: ["http://repo1.maven.org/maven2/org/apache/tomcat/dbcp/6.0.26/dbcp-6.0.26.jar", "http://repo1.maven.org/maven2/mysql/mysql-connector-java/5.1.6/mysql-connector-java-5.1.6.jar"]
             input.war-uri: "file:///tmp/ROOT.war"
+            input.create-context: false
             input.lbstats-stats-user: admin
             input.lbstats-stats-pass: pa55w0rd
             input.lbstats-stats-port: "1926"
             input.lbstats-stats-url: "/admin?stats"
-#            input.java_opts: "-Djava.awt.headless=true -Xmx256m -XX:+UseConcMarkSweepGC -Ddatabase.driver=com.mysql.jdbc.Driver -Ddatabase.url=jdbc:mysql://{$.props.db-info.db-host[0]}:{$.props.db-info.db-port}/{$.db-name}?autoReconnect=true -Ddatabase.user=broadleaf -Ddatabase.password=broadleaf"
+
 
             configuration.triggers:
               app-output.app-hosts: app-scale
@@ -122,7 +124,9 @@ application:
                   - lib-uri: &lib-uri
                       description: URI to additional app libs
                   - war-uri: &war-uri
-                      description: URI to app 
+                      description: URI to app
+                  - create-context: &create-context
+                      description: Create or not context file
                   - lbstats-stats-user: &lbstats-stats-user
                       description: lb statistic user
                   - lbstats-stats-pass: &lbstats-stats-pass
@@ -142,7 +146,7 @@ application:
                       phase: create-db
                       precedingPhases: [ get-env-props ]
                       parameters:
-                        timeout: 300
+                        timeout: 600
                         service: db-manage
                         command: create-db
                         arguments:
@@ -152,7 +156,7 @@ application:
                       precedingPhases: [ create-db ]
                       phase: grant-db
                       parameters:
-                        timeout: 300
+                        timeout: 600
                         service: db-manage
                         command: change-grants
                         arguments:
@@ -178,7 +182,7 @@ application:
                       phase: deploy-libs
                       precedingPhases: [ get-env-props ]
                       parameters:
-                        timeout: 300
+                        timeout: 600
                         service: app-manage
                         command: deploy-libs
                         arguments:
@@ -188,17 +192,17 @@ application:
                       phase: reconfigure-tomcat
                       precedingPhases: [ deploy-libs ]
                       parameters:
-                        timeout: 300
+                        timeout: 600
                         service: app-manage
                         command: reconfigure
                         arguments:
-                          java-opts: "-Djava.awt.headless=true -Xmx256m -XX:+UseConcMarkSweepGC -Ddatabase.driver=com.mysql.jdbc.Driver -Ddatabase.url=jdbc:mysql://{$.props.db-info.db-host[0]}:{$.props.db-info.db-port}/{$.db-name}?autoReconnect=true -Ddatabase.user=broadleaf -Ddatabase.password=broadleaf"
+                          java-opts: "-Djava.awt.headless=true -Xmx700m -XX:+UseConcMarkSweepGC -Ddatabase.driver=com.mysql.jdbc.Driver -Ddatabase.url=jdbc:mysql://{$.props.db-info.db-host[0]}:{$.props.db-info.db-port}/{$.db-name}?autoReconnect=true -Ddatabase.user=broadleaf -Ddatabase.password=broadleaf"
                   - restart-tomcat:
                       action: serviceCall
                       phase: restart-tomcat
                       precedingPhases: [ reconfigure-tomcat ]
                       parameters:
-                        timeout: 300
+                        timeout: 600
                         service: app-manage
                         command: manage-service
                         arguments:
@@ -208,48 +212,33 @@ application:
                       phase: deploy-war
                       precedingPhases: [ build-app, deploy-libs, reconfigure-tomcat, restart-tomcat ]
                       parameters:
-                        timeout: 300
+                        timeout: 600
                         service: app-manage
                         command: deploy-war
                         arguments:
+                          create-context: "{$.create-context}" 
                           war-uri: "{$.war-uri}"
-                          context-attrs: {
-                            "docBase": "{$.war-uri}",
-                            "path": "/",
-                            "debug": "5",
-                            "reloadable": "true",
-                            "crossContext": "true",
-                            "allowLinking": "true"
-                          }
-                          context-nodes:
-                            - Environments: {
-                                "name": "appEnvironment",
-                                "value": "_default",
-                                "type": "java.lang.String",
-                                "override": "false"
-                            }
-                            - Resource: {
-                                "name": "jdbc/datasource",
-                                "auth": "Container",
-                                "type": "javax.sql.DataSource",
-                                "maxActive": "8",
-                                "maxIdle": "8",
-                                "maxWait": "-1",
-                                "username": "{$.db-user}",
-                                "password": "{$.db-password}",
-                                "driverClassName": "com.mysql.jdbc.Driver",
-                                "url": "jdbc:mysql://{$.props.db-info.db-host[0]}:{$.props.db-info.db-port}/{$.db-name}?autoReconnect=true",
-                                "validationQuery": "select 1",
-                                "testOnReturn": "true",
-                                "testWhileIdle": "true"
-                            }
-
+                          context-attrs: {}
+                          context-nodes: []                            
+                  - deploy-admin-war:
+                      action: serviceCall
+                      phase: deploy-admin-war
+                      precedingPhases: [ build-app, deploy-libs, reconfigure-tomcat, restart-tomcat, deploy-war ]
+                      parameters:
+                        timeout: 600
+                        service: app-manage
+                        command: deploy-war
+                        arguments:
+                           create-context: "{$.create-context}" 
+                           war-uri: "file:///tmp/admin.war"
+                           context-attrs: {}
+                           context-nodes: []                           
                   - lb-add-server:
                       action: serviceCall
-                      precedingPhases: [ deploy-war ]
+                      precedingPhases: [ deploy-war, deploy-admin-war ]
                       phase: lb-add-server
                       parameters:
-                        timeout: 300
+                        timeout: 600
                         service: lb-manage
                         command: add-servers
                         arguments:
@@ -262,6 +251,7 @@ application:
                 return:
                   entry-url:
                     value: "{$.result-lb.entry-url}"
+              
               app-scale:
                 steps:
                   - get-env-props:
@@ -274,7 +264,7 @@ application:
                       precedingPhases: [ get-env-props ]
                       phase: grant-db
                       parameters:
-                        timeout: 300
+                        timeout: 600
                         service: db-manage
                         command: change-grants
                         arguments:
@@ -300,51 +290,57 @@ application:
                       phase: deploy-libs
                       precedingPhases: [ get-env-props ]
                       parameters:
-                        timeout: 300
+                        timeout: 600
                         service: app-manage
                         command: deploy-libs
                         arguments:
                           lib-uri: "{$.lib-uri}"
+                  - reconfigure-tomcat:
+                      action: serviceCall
+                      phase: reconfigure-tomcat
+                      precedingPhases: [ deploy-libs ]
+                      parameters:
+                        timeout: 600
+                        service: app-manage
+                        command: reconfigure
+                        arguments:
+                          java-opts: "-Djava.awt.headless=true -Xmx700m -XX:+UseConcMarkSweepGC -Ddatabase.driver=com.mysql.jdbc.Driver -Ddatabase.url=jdbc:mysql://{$.props.db-info.db-host[0]}:{$.props.db-info.db-port}/{$.db-name}?autoReconnect=true -Ddatabase.user=broadleaf -Ddatabase.password=broadleaf"
+                  - restart-tomcat:
+                      action: serviceCall
+                      phase: restart-tomcat
+                      precedingPhases: [ reconfigure-tomcat ]
+                      parameters:
+                        timeout: 600
+                        service: app-manage
+                        command: manage-service
+                        arguments:
+                          service-action: "restart"        
                   - deploy-war:
                       action: serviceCall
                       phase: deploy-war
-                      precedingPhases: [ build-app, deploy-libs ]
+                      precedingPhases: [ build-app, deploy-libs, reconfigure-tomcat, restart-tomcat ]
                       parameters:
-                        timeout: 300
+                        timeout: 600
                         service: app-manage
                         command: deploy-war
                         arguments:
+                          create-context: "{$.create-context}" 
                           war-uri: "{$.war-uri}"
-                          context-attrs: {
-                            "docBase": "{$.war-uri}",
-                            "path": "/",
-                            "debug": "5",
-                            "reloadable": "true",
-                            "crossContext": "true",
-                            "allowLinking": "true"
-                          }
-                          context-nodes:
-                            - Environments: {
-                                "name": "appEnvironment",
-                                "value": "_default",
-                                "type": "java.lang.String",
-                                "override": "false"
-                            }
-                            - Resource: {
-                                "name": "jdbc/datasource",
-                                "auth": "Container",
-                                "type": "javax.sql.DataSource",
-                                "maxActive": "8",
-                                "maxIdle": "8",
-                                "maxWait": "-1",
-                                "username": "{$.db-user}",
-                                "password": "{$.db-password}",
-                                "driverClassName": "com.mysql.jdbc.Driver",
-                                "url": "jdbc:mysql://{$.props.db-info.db-host[0]}:{$.props.db-info.db-port}/{$.db-name}?autoReconnect=true",
-                                "validationQuery": "select 1",
-                                "testOnReturn": "true",
-                                "testWhileIdle": "true"
-                            }
+                          context-attrs: {}
+                          context-nodes: []                            
+                  - deploy-admin-war:
+                      action: serviceCall
+                      phase: deploy-admin-war
+                      precedingPhases: [ build-app, deploy-libs, reconfigure-tomcat, restart-tomcat, deploy-war ]
+                      parameters:
+                        timeout: 600
+                        service: app-manage
+                        command: deploy-war
+                        arguments:
+                           create-context: "{$.create-context}" 
+                           war-uri: "file:///tmp/admin.war"
+                           context-attrs: {}
+                           context-nodes: []
                   - lb-reconfigure-servers:
                       action: serviceCall
                       precedingPhases: [ deploy-war ]
@@ -360,6 +356,11 @@ application:
 
               rebuild-app:
                 steps:
+                  - get-env-props:
+                      action: getEnvironmentProperties
+                      phase: get-env-props
+                      output:
+                        props: result
                   - build-app:
                       action: serviceCall
                       phase: build-app
@@ -377,51 +378,57 @@ application:
                       phase: deploy-libs
                       precedingPhases: [ get-env-props ]
                       parameters:
-                        timeout: 300
+                        timeout: 600
                         service: app-manage
                         command: deploy-libs
                         arguments:
                           lib-uri: "{$.lib-uri}"
+                  - reconfigure-tomcat:
+                      action: serviceCall
+                      phase: reconfigure-tomcat
+                      precedingPhases: [ deploy-libs ]
+                      parameters:
+                        timeout: 600
+                        service: app-manage
+                        command: reconfigure
+                        arguments:
+                          java-opts: "-Djava.awt.headless=true -Xmx700m -XX:+UseConcMarkSweepGC -Ddatabase.driver=com.mysql.jdbc.Driver -Ddatabase.url=jdbc:mysql://{$.props.db-info.db-host[0]}:{$.props.db-info.db-port}/{$.db-name}?autoReconnect=true -Ddatabase.user=broadleaf -Ddatabase.password=broadleaf"
+                  - restart-tomcat:
+                      action: serviceCall
+                      phase: restart-tomcat
+                      precedingPhases: [ reconfigure-tomcat ]
+                      parameters:
+                        timeout: 600
+                        service: app-manage
+                        command: manage-service
+                        arguments:
+                          service-action: "restart"        
                   - deploy-war:
                       action: serviceCall
                       phase: deploy-war
-                      precedingPhases: [ build-app, deploy-libs ]
+                      precedingPhases: [ build-app, deploy-libs, reconfigure-tomcat, restart-tomcat ]
                       parameters:
-                        timeout: 300
+                        timeout: 600
                         service: app-manage
                         command: deploy-war
                         arguments:
+                          create-context: "{$.create-context}" 
                           war-uri: "{$.war-uri}"
-                          context-attrs: {
-                            "docBase": "{$.war-uri}",
-                            "path": "/",
-                            "debug": "5",
-                            "reloadable": "true",
-                            "crossContext": "true",
-                            "allowLinking": "true"
-                          }
-                          context-nodes:
-                            - Environments: {
-                                "name": "appEnvironment",
-                                "value": "_default",
-                                "type": "java.lang.String",
-                                "override": "false"
-                            }
-                            - Resource: {
-                                "name": "jdbc/datasource",
-                                "auth": "Container",
-                                "type": "javax.sql.DataSource",
-                                "maxActive": "8",
-                                "maxIdle": "8",
-                                "maxWait": "-1",
-                                "username": "{$.db-user}",
-                                "password": "{$.db-password}",
-                                "driverClassName": "com.mysql.jdbc.Driver",
-                                "url": "jdbc:mysql://{$.props.db-info.db-host[0]}:{$.props.db-info.db-port}/{$.db-name}?autoReconnect=true",
-                                "validationQuery": "select 1",
-                                "testOnReturn": "true",
-                                "testWhileIdle": "true"
-                            }
+                          context-attrs: {}
+                          context-nodes: []                            
+                  - deploy-admin-war:
+                      action: serviceCall
+                      phase: deploy-admin-war
+                      precedingPhases: [ build-app, deploy-libs, reconfigure-tomcat, restart-tomcat, deploy-war ]
+                      parameters:
+                        timeout: 600
+                        service: app-manage
+                        command: deploy-war
+                        arguments:
+                           create-context: "{$.create-context}" 
+                           war-uri: "file:///tmp/admin.war"
+                           context-attrs: {}
+                           context-nodes: []
               destroy:
                 steps: []
 
@@ -452,9 +459,9 @@ application:
         management:
           build-app: receive-command(string scm-provider, string git-uri, string app-branch)
           deploy-libs: receive-command(list<string> lib-uri)
-          deploy-war: receive-command(string war-uri, object context-attrs, object context-nodes)
+          deploy-war: receive-command(string war-uri, bool create-context, object context-attrs, object context-nodes)
           reconfigure: receive-command(string java-opts)
-          service-manage: receive-command(string service-action)
+          manage-service: receive-command(string service-action)
         output:
           app-hosts: publish-signal(list<string>)
           app-port: publish-signal(string)
