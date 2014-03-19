@@ -28,9 +28,9 @@ application:
           quantity: configuration(string)
           java-opts: configuration(string)
         actions:
-          build-app: receive-command(string scm-provider, string git-uri, string app-branch)
+          build-app: receive-command(string scm-provider, string git-uri, string app-branch => list<string> wars)
           deploy-libs: receive-command(list<string> lib-uri)
-          deploy-war: receive-command(string war-uri, bool create-context, object context-attrs, object context-nodes)
+          deploy-war: receive-command(string uri, string appname, bool create-context, object context-attrs, object context-nodes)
           reconfigure: receive-command(string java-opts)
           manage-service: receive-command(string service-action)
         result:
@@ -105,7 +105,11 @@ application:
                         provider: "{$.scm-provider}"
                         repository: "{$.git-uri}"
                         revision: "{$.app-branch}"
-
+                  output:
+                    chefAttrs: chefState
+            return:
+              wars:
+                value: "{$.chefAttrs['*'][0].build-bl.artefacts}"
           deploy-libs:
             parameters:
               - lib-uri:
@@ -129,8 +133,10 @@ application:
               - create-context:
                   description: Create or not context.xml
                   default: true
-              - war-uri:
+              - uri:
                   description: WAR uri
+              - appname:
+                  description: APP name
               - context-attrs:
                   description: Context parameters for context.xml
               - context-nodes:
@@ -147,7 +153,9 @@ application:
                     recipeUrl: "https://raw.github.com/loky9000/broadleaf-component/master/cookbooks.tar.gz" 
                     jattrs:
                       tomcat-component:
-                        war_uri: "{$.war-uri}"
+                        war:
+                          uri: "{$.uri}"
+                          appname: "{$.appname}"
                         create-context: "{$.create-context}"
                         context:
                           context_attrs: "{$.context-attrs}"
