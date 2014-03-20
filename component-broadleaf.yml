@@ -206,7 +206,7 @@ application:
                           uri: "{$.warlist.wars[1]}"
                           appname: "ROOT.war"
                           context-attrs: {}
-                          context-nodes: []                            
+                          context-nodes: []
                   - deploy-admin-war:
                       action: serviceCall
                       phase: deploy-admin-war
@@ -220,7 +220,7 @@ application:
                            uri: "{$.warlist.wars[0]}"
                            appname: "admin.war"
                            context-attrs: {}
-                           context-nodes: []                           
+                           context-nodes: []
                   - lb-add-server:
                       action: serviceCall
                       precedingPhases: [ deploy-war, deploy-admin-war ]
@@ -275,6 +275,8 @@ application:
                           scm-provider: "{$.scm-provider}"
                           git-uri: "git://github.com/{$.app-fork}/DemoSite.git"
                           app-branch: "{$.app-branch}"
+                      output:
+                        warlist: result    
                   - deploy-libs:
                       action: serviceCall
                       phase: deploy-libs
@@ -304,7 +306,7 @@ application:
                         service: app-manage
                         command: manage-service
                         arguments:
-                          service-action: "restart"        
+                          service-action: "restart"
                   - deploy-war:
                       action: serviceCall
                       phase: deploy-war
@@ -318,7 +320,7 @@ application:
                           uri: "{$.warlist.wars[1]}"
                           appname: "ROOT.war"
                           context-attrs: {}
-                          context-nodes: []                            
+                          context-nodes: []
                   - deploy-admin-war:
                       action: serviceCall
                       phase: deploy-admin-war
@@ -365,6 +367,8 @@ application:
                           scm-provider: "{$.scm-provider}"
                           git-uri: "git://github.com/{$.app-fork}/DemoSite.git"
                           app-branch: "{$.app-branch}"
+                      output:
+                        warlist: result
                   - deploy-libs:
                       action: serviceCall
                       phase: deploy-libs
@@ -394,7 +398,7 @@ application:
                         service: app-manage
                         command: manage-service
                         arguments:
-                          service-action: "restart"        
+                          service-action: "restart"
                   - deploy-war:
                       action: serviceCall
                       phase: deploy-war
@@ -408,7 +412,7 @@ application:
                           uri: "{$.warlist.wars[1]}"
                           appname: "ROOT.war"
                           context-attrs: {}
-                          context-nodes: []                            
+                          context-nodes: []
                   - deploy-admin-war:
                       action: serviceCall
                       phase: deploy-admin-war
@@ -435,8 +439,7 @@ application:
           db-version: configuration(string)
           db-root-password: configuration(string)
         management:
-          create-db: receive-command(string db-name)
-          #run-sql: receive-command(string db-name, list<string> sql-url)
+          create-db: receive-command(string db-name)          
           change-grants: receive-command(list<string> app-hosts, string db-name, string db-user, string db-password, list<string> privileges)
         output:
           dbms: publish-signal(object)
