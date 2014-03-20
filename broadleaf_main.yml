@@ -332,8 +332,9 @@ application:
                         service: app-manage
                         command: deploy-war
                         arguments:
-                          create-context: "{$.create-context}" 
-                          war-uri: "{$.war-uri}"
+                          create-context: "{$.create-context}"
+                          uri: "{$.warlist.wars[1]}"
+                          appname: "ROOT.war"
                           context-attrs: {}
                           context-nodes: []                            
                   - deploy-admin-war:
@@ -346,9 +347,10 @@ application:
                         command: deploy-war
                         arguments:
                            create-context: "{$.create-context}" 
-                           war-uri: "file:///tmp/admin.war"
+                           uri: "{$.warlist.wars[0]}"
+                           appname: "admin.war"
                            context-attrs: {}
-                           context-nodes: []
+                           context-nodes: [] 
                   - lb-reconfigure-servers:
                       action: serviceCall
                       precedingPhases: [ deploy-war ]
@@ -420,8 +422,9 @@ application:
                         service: app-manage
                         command: deploy-war
                         arguments:
-                          create-context: "{$.create-context}" 
-                          war-uri: "{$.war-uri}"
+                          create-context: "{$.create-context}"
+                          uri: "{$.warlist.wars[1]}"
+                          appname: "ROOT.war"
                           context-attrs: {}
                           context-nodes: []                            
                   - deploy-admin-war:
@@ -434,7 +437,8 @@ application:
                         command: deploy-war
                         arguments:
                            create-context: "{$.create-context}" 
-                           war-uri: "file:///tmp/admin.war"
+                           uri: "{$.warlist.wars[0]}"
+                           appname: "admin.war"
                            context-attrs: {}
                            context-nodes: []
               destroy:
