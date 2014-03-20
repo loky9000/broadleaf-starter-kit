@@ -22,19 +22,12 @@ application:
       lb: "bind(lb#output.lb-stats)"
       app: "bind(app#output.app-hosts)"
       db: "bind(db#output.dbms)"
-      entry: "bind(main.workflow#result.entry-url)"
+      demosite: "bind(main.workflow#result.entry-url)"
+      admin_url:  "bind(main.workflow#result.entry-admin-url)"
 
   components:
-    main:
-      bindings:
-        - [wfService, workflow]
-      components:
-        wfService:
-          type: reference.Service
-          interfaces:
-            executor:
-              execute-workflow: receive-command(object request => object status => object status)
-              execute-command: send-command(string interface, string command, map<string, object> arguments => map<string, object> response => map<string, object> response)
+    main:      
+      components:        
         workflow:
           type: workflow.Instance
           interfaces:
@@ -44,14 +37,10 @@ application:
               app-fork: configuration(string)
               app-branch: configuration(string)
               lb-bucket: configuration(string)
-              #as constants
-              #db-sql-url: configuration(list<string>)
               db-user: configuration(string)
               db-password: configuration(string)
               privileges: configuration(list<string>)
               lib-uri: configuration(list<string>)
-#              uri: configuration(string)
-#              appname: configuration(string)
               create-context: configuration(bool)
               lbstats-stats-user: configuration(string)
               lbstats-stats-pass: configuration(string)
@@ -63,8 +52,7 @@ application:
               db-port: consume-signal(string)
             db-manage:
               create-db: send-command(string db-name)
-              change-grants: send-command(list<string> app-hosts, string db-name, string db-user, string db-password, list<string> privileges)
-          #    run-sql: send-command(string db-name, list<string> sql-url)
+              change-grants: send-command(list<string> app-hosts, string db-name, string db-user, string db-password, list<string> privileges)  
             app-manage:
               build-app: send-command(string scm-provider, string git-uri, string app-branch => list<string> wars )
               deploy-libs: send-command(list<string> lib-uri)
@@ -79,17 +67,15 @@ application:
               reconfigure-servers: send-command(list<string> app-hosts, string app-port, string lb-bucket)
             result:
               entry-url: publish-signal(string)
+              entry-admin-url: publish-signal(string)
 
           required: [db-manage, app-manage, lb-manage, db-info, app-output]
-          configuration:
-          # input.db-sql-url: ["https://raw.github.com/qubell-bazaar/component-petclinic/master/sql/petclinic-mysql-schema.sql", "https://raw.github.com/qubell-bazaar/component-petclinic/master/sql/petclinic-mysql-dataload.sql"]
+          configuration: 
             input.db-user: broadleaf
             input.db-password: broadleaf #const
             input.privileges: ["all"] #const
             input.scm-provider: git #const
             input.lib-uri: ["http://repo1.maven.org/maven2/org/apache/tomcat/dbcp/6.0.26/dbcp-6.0.26.jar", "http://repo1.maven.org/maven2/mysql/mysql-connector-java/5.1.6/mysql-connector-java-5.1.6.jar"]
-#           input.uri: "file:///tmp/site.war"
-#           input.appname: "ROOT"
             input.create-context: false
             input.lbstats-stats-user: admin
             input.lbstats-stats-pass: pa55w0rd
@@ -109,8 +95,6 @@ application:
                 parameters:
                   - db-name: &db-name
                       description: primary db name
-           #       - db-sql-url: &db-sql-url
-           #           description: sql url
                   - db-user: &db-user
                       description: user for new database
                   - db-password: &db-password
@@ -125,10 +109,6 @@ application:
                       description: git branch
                   - lib-uri: &lib-uri
                       description: URI to additional app libs
-#                  - uri: &uri
-#                      description: URI to app
-#                  - appname: &appname
-#                      description: App name
                   - create-context: &create-context
                       description: Create or not context file
                   - lbstats-stats-user: &lbstats-stats-user
@@ -259,6 +239,8 @@ application:
                 return:
                   entry-url:
                     value: "{$.result-lb.entry-url}"
+                  entry-admin-url:
+                    value: "{$.result-lb.entry-url}/admin"
               
               app-scale:
                 steps:

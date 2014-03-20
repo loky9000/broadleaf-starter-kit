@@ -57,8 +57,8 @@ application:
                     hardwareId: m1.medium
                     targetQuantity: "{$.quantity}"
                     jcloudsNodeNamePrefix: component
-                    vmIdentity: root
-                    imageId: us-east-1/ami-bf5021d6
+                    vmIdentity: ubuntu
+                    imageId: us-east-1/ami-967edcff
                   output:
                     app-hosts: ips
 
@@ -98,7 +98,7 @@ application:
                   parameters:
                     isSolo: true
                     roles: [ default ]
-                    runList: [ "recipe[build-bl]" ]
+                    runList: [ "recipe[build]" ]
                     recipeUrl: "https://raw.github.com/loky9000/broadleaf-component/master/cookbooks.tar.gz"
                     jattrs:
                       scm:
@@ -109,7 +109,7 @@ application:
                     chefAttrs: chefState
             return:
               wars:
-                value: "{$.chefAttrs['*'][0].build-bl.artefacts}"
+                value: "{$.chefAttrs['*'][0].build.artefacts}"
           deploy-libs:
             parameters:
               - lib-uri:
