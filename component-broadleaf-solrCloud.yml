@@ -237,8 +237,8 @@ application:
                           recipeUrl: "https://raw.github.com/loky9000/broadleaf-component/master/cookbooks.tar.gz"
                           jattrs:
                             broadleaf:
-                              solr_url: "{$.result-solr-lb.entry-url}/solr"
-                              solr_reindex_url: "{$.result-solr-lb.entry-url}/solr/reindex"
+                              solr_url: "{$.result-solr-lb.entry-url}:8080/solr"
+                              solr_reindex_url: "{$.result-solr-lb.entry-url}:8080/solr/reindex"
                   - deploy-libs:
                       action: serviceCall
                       phase: deploy-libs
@@ -311,7 +311,14 @@ application:
                           lb-bucket: "http://roundrobin:80/"
                       output:
                         result-lb: result
-                          #todo move lb-bucket to launch param                          
+                          #todo move lb-bucket to launch param 
+                  - await300seconds:
+                      action: wait
+                      description: Sample step that waits for 5 minute.
+                      phase: sync
+                      precedingPhases: [lb-add-server]
+                      parameters:
+                        delay: 300   
                 return:
                   entry-url:
                     value: "{$.result-lb.entry-url}"
@@ -376,8 +383,8 @@ application:
                           recipeUrl: "https://raw.github.com/loky9000/broadleaf-component/master/cookbooks.tar.gz"
                           jattrs:
                             broadleaf:
-                              solr_url: "{$.props.lb-output.lb-stats.lb-host[0]}/solr"
-                              solr_reindex_url: "{$.props.lb-output.lb-stats.lb-host[0]}/solr/reindex"
+                              solr_url: "{$.props.lb-output.lb-stats.lb-host}:8080/solr"
+                              solr_reindex_url: "{$.props.lb-output.lb-stats.lb-host}:8080/solr/reindex"
                   - deploy-libs:
                       action: serviceCall
                       phase: deploy-libs
@@ -448,7 +455,13 @@ application:
                           app-hosts: "{$.props.app-output.app-hosts}"
                           app-port: "{$.props.app-output.app-port}"
                           lb-bucket: "http://roundrobin:80/"
-
+                  - await300seconds:
+                      action: wait
+                      description: Sample step that waits for 5 minute.
+                      phase: sync
+                      precedingPhases: [lb-reconfigure-servers]
+                      parameters:
+                        delay: 300   
               rebuild-app:
                 steps:
                   - get-env-props:
@@ -491,8 +504,8 @@ application:
                           recipeUrl: "https://raw.github.com/loky9000/broadleaf-component/master/cookbooks.tar.gz"
                           jattrs:
                             broadleaf:
-                              solr_url: "{$.props.lb-output.lb-stats.lb-host[0]}/solr"
-                              solr_reindex_url: "{$.props.lb-output.lb-stats.lb-host[0]}/solr/reindex"
+                              solr_url: "{$.props.lb-output.lb-stats.lb-host}:8080/solr"
+                              solr_reindex_url: "{$.props.lb-output.lb-stats.lb-host}:8080/solr/reindex"
                   - deploy-libs:
                       action: serviceCall
                       phase: deploy-libs
@@ -551,13 +564,20 @@ application:
                            appname: "admin.war"
                            context-attrs: {}
                            context-nodes: []
+                  - await300seconds:
+                      action: wait
+                      description: Sample step that waits for 5 minute.
+                      phase: sync
+                      precedingPhases: [deploy-admin-war]
+                      parameters:
+                        delay: 300   
               destroy:
                 steps: []
 
     db:
       type: reference.Submodule
       configuration:
-        __locator.application-id: "mysql_component"
+        __locator.application-id: "533bf8dbe4b0a12dbc347cb3"
       interfaces:
         input:
           db-version: configuration(string)
@@ -573,7 +593,7 @@ application:
     app:
       type: reference.Submodule
       configuration:
-        __locator.application-id: "532036ffe4b013e85a2a5016"
+        __locator.application-id: "533bf86ce4b0a12dbc347cb1"
       interfaces:
         input:
           image: configuration(string)
@@ -593,7 +613,7 @@ application:
     lb:
       type: reference.Submodule
       configuration:
-        __locator.application-id: "haproxy_component"
+        __locator.application-id: "533bf96ce4b0a12dbc347cb5"
       interfaces:
         input:
           stats-user: configuration(string)
@@ -609,7 +629,7 @@ application:
     solr:
         type: reference.Submodule
         configuration:
-          __locator.application-id: "5332ebbfe4b02e2112b4f9a1"
+          __locator.application-id: "533bf842e4b0a12dbc347cb0"
         interfaces:   
            input:
               solr-quantity: configuration(string)
