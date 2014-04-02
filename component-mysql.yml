@@ -1,0 +1,161 @@
+application:
+  configuration:
+    input.db-version: "5.0"
+    input.db-root-password: uR1zaebah0Qu
+
+  interfaces:
+    input:
+      db-version: "bind(workflow#input.db-version)"
+      db-root-password: "bind(workflow#input.db-root-password)"
+    management:
+      create-db: "bind(workflow#actions.create-db)"
+      run-sql: "bind(workflow#actions.run-sql)"
+      change-grants: "bind(workflow#actions.change-grants)"
+    output:
+      dbms: "bind(workflow#result.dbms)"
+      db-host: "bind(workflow#result.db-host)"
+      db-port: "bind(workflow#result.db-port)"
+
+  components:
+    workflow:
+      type: workflow.Instance
+      interfaces:
+        input:
+          db-version: configuration(string)
+          db-root-password: configuration(string)
+        actions:
+          create-db: receive-command(string db-name)
+          run-sql: receive-command(string db-name, list<string> sql-url)
+          change-grants: receive-command(list<string> app-hosts, string db-name, string db-user, string db-password, list<string> privileges)
+        result:
+          dbms: publish-signal(object)
+          #for ui only
+          db-port: publish-signal(string)
+          db-host: publish-signal(list<string>)
+
+      configuration:
+        configuration.workflows:  
+          launch:
+            parameters:
+              - db-version: &db-version
+                  description: MySQL Server version   
+              - db-root-password:
+                  description: Root Password
+                  default: uR1zaebah0Qu
+
+            steps:
+              - provision-vm:
+                  action: provisionAmazonVm
+                  phase: provision
+                  parameters:
+                    roleName: default
+                    hardwareId: m1.small
+                    retryCount: 1
+                    jcloudsProvider: aws-ec2
+                    jcloudsEndpoint: https://ec2.us-east-1.amazonaws.com
+                    jcloudsRegions: us-east-1
+                    jcloudsNodeNamePrefix: component
+                    jcloudsIdentity: "{$.identity}"
+                    jcloudsCredential: "{$.credential}"
+                    vmIdentity: ubuntu
+                    imageId: us-east-1/ami-967edcff
+                    ec2SecurityGroup: default
+                  output:
+                    db-host: ips
+
+              - db-install:
+                  action: "chefsolo"
+                  precedingPhases: [ provision ]
+                  phase: db-install
+                  parameters:
+                    roles: [ default ]
+                    runList: ["recipe[mysql-component]"]
+                    recipeUrl: "https://s3.amazonaws.com/qubell-starter-kit-artifacts/qubell-bazaar/component-mysql-dev-cookbooks-stable-18a832d.tar.gz"
+                    jattrs:
+                      mysql:
+                        server_root_password: "{$.db-root-password}"
+                        server_repl_password: "{$.db-root-password}"
+                        server_debian_password: "{$.db-root-password}"
+
+            return:
+              db-host:
+                value: "{$.db-host}"
+              db-port:
+                value: "3306"
+              dbms:
+                value:
+                   db-host: "{$.db-host}"
+                   db-port: "3306"
+                   root-password: "{$.db-root-password}"
+
+          create-db:
+            parameters:
+              - db-name:
+                  description: Create database name
+            steps:
+              - db-deploy:
+                  action: "chefsolo"
+                  parameters:
+                    roles: [ default ]
+                    runList: [ "recipe[mysql-component::db_create]" ]
+                    recipeUrl: "https://s3.amazonaws.com/qubell-starter-kit-artifacts/qubell-bazaar/component-mysql-dev-cookbooks-stable-18a832d.tar.gz"
+                    jattrs:
+                      mysql:
+                        server_root_password: "{$.db-root-password}"
+                      mysql-component:
+                        db_name: "{$.db-name}"
+
+            return:
+              db:
+                value:
+                  name: "{$.db-name}"
+
+          run-sql:
+            parameters:
+              - db-name:
+                  description: Database
+              - sql-url:
+                  description: SQL query urls (["url1", "url2"])
+            steps:
+              - db-deploy:
+                  action: "chefsolo"
+                  parameters:
+                    roles: [ default ]
+                    runList: [ "recipe[mysql-component::sql_query]" ]
+                    recipeUrl: "https://s3.amazonaws.com/qubell-starter-kit-artifacts/qubell-bazaar/component-mysql-dev-cookbooks-stable-18a832d.tar.gz"
+                    jattrs:
+                      mysql:
+                        server_root_password: "{$.db-root-password}"
+                      mysql-component:
+                        db_name: "{$.db-name}"
+                        sql_url: "{$.sql-url}"
+
+          change-grants:
+            parameters:
+              - app-hosts:
+                  description: "Hosts allow in MySQL ([array])"
+              - db-name:
+                  description: "Database name"
+              - db-user:
+                  description: "User name"
+              - db-password:
+                  description: "User password"
+              - privileges:
+                  description: Grant privileges
+
+            steps: 
+              - change-grants:
+                  action: "chefsolo"
+                  parameters:
+                    roles: [ default ]
+                    runList: [ "recipe[mysql-component::user_modify]" ]
+                    recipeUrl: "https://s3.amazonaws.com/qubell-starter-kit-artifacts/qubell-bazaar/component-mysql-dev-cookbooks-stable-18a832d.tar.gz"
+                    jattrs:
+                      mysql:
+                        server_root_password: "{$.db-root-password}"
+                      mysql-component:
+                        host: "{$.app-hosts}"
+                        db_name: "{$.db-name}" 
+                        db_user: "{$.db-user}"
+                        db_pass: "{$.db-password}"
+                        privileges: "{$.privileges}"
