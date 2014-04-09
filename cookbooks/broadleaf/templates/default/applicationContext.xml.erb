@@ -132,10 +132,10 @@
     <!-- for example: http://localhost:8983/solr/reindex. The defaultCoreName property in solr.xml should -->
     <!-- point to the primary core. solr.source and solr.source.reindex should be set to solrServer and -->
     <!-- solrReindexServer, respectively. -->
-        <bean id="solrServer" class="org.apache.solr.client.solrj.impl.HttpSolrServer"> 
+        <bean id="solrServer" class="org.apache.solr.client.solrj.impl.CloudSolrServer"> 
              <constructor-arg value="<%= @solr_url %>" /> 
         </bean> 
-         <bean id="solrReindexServer" class="org.apache.solr.client.solrj.impl.HttpSolrServer"> 
+         <bean id="solrReindexServer" class="org.apache.solr.client.solrj.impl.CloudSolrServer"> 
              <constructor-arg value="<%= @solr_reindex_url %>" /> 
          </bean> 
     <bean id="blSearchService" class="org.broadleafcommerce.core.search.service.solr.SolrSearchServiceImpl">
