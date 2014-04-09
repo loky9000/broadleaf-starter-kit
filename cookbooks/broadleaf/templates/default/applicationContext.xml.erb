@@ -134,9 +134,11 @@
     <!-- solrReindexServer, respectively. -->
         <bean id="solrServer" class="org.apache.solr.client.solrj.impl.CloudSolrServer"> 
              <constructor-arg value="<%= @solr_url %>" /> 
+             <property name="defaultCollection" value="primary" />
         </bean> 
          <bean id="solrReindexServer" class="org.apache.solr.client.solrj.impl.CloudSolrServer"> 
              <constructor-arg value="<%= @solr_reindex_url %>" /> 
+             <property name="defaultCollection" value="primary" />
          </bean> 
     <bean id="blSearchService" class="org.broadleafcommerce.core.search.service.solr.SolrSearchServiceImpl">
         <constructor-arg name="solrServer" ref="${solr.source}" />
