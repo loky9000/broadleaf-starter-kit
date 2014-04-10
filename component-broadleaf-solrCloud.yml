@@ -3,14 +3,14 @@ application:
     input.db-name: broadleaf
     input.lb-bucket: http://roundrobin:80
     input.app-fork: loky9000
-    input.app-branch: solr-standalone #red, master
-    input.app-quantity: "2"
+    input.app-branch: solr-cloud #solr-green
+    input.app-quantity: "1"
     input.app-image: "us-east-1/ami-967edcff"
     input.app-identity: "ubuntu"
     input.instance-size: "m1.small"
     input.solr-collections: ["https://raw.githubusercontent.com/loky9000/broadleaf-component/master/cores.tar.gz"]
-    input.solr-quantity: "3"
-    input.zookeeper-quantity: "4"
+    input.solr-quantity: "4"
+    input.zookeeper-quantity: "3"
 
     
     
@@ -38,8 +38,10 @@ application:
       app: "bind(app#output.app-hosts)"
       db: "bind(db#output.dbms)"
       demosite: "bind(main.workflow#result.entry-url)"
-      admin_url:  "bind(main.workflow#result.entry-admin-url)"
-      solr-url: "bind(main.workflow#result.solr-url)"
+      admin_url: "bind(main.workflow#result.entry-admin-url)"
+      solr-url: "bind(solr#endpoints.solr-url)"
+      zoo-ui: "bind(solr#nodes.zoo-ui)"
+      
 
   components:
     main:      
@@ -59,6 +61,7 @@ application:
               db-user: configuration(string)
               db-password: configuration(string)              
               privileges: configuration(list<string>)
+              db-sql-url: configuration(list<string>)
               lib-uri: configuration(list<string>)
               create-context: configuration(bool)
               lbstats-stats-user: configuration(string)
@@ -74,12 +77,13 @@ application:
               db-port: consume-signal(string)
             solr-info:
               solr-url: consume-signal(list<string>)
-            solr-nodes:
-              solr-hosts: consume-signal(list<string>)
-              solr-port: consume-signal(string)
+            zoo-hosts:
+              solr-zoo-nodes: consume-signal(string)
+              zoo-ui: consume-signal(list<string>)
             db-manage:
               create-db: send-command(string db-name)
-              change-grants: send-command(list<string> app-hosts, string db-name, string db-user, string db-password, list<string> privileges)  
+              change-grants: send-command(list<string> app-hosts, string db-name, string db-user, string db-password, list<string> privileges)
+              run-sql: send-command(string db-name, list<string> sql-url)
             app-manage:
               build-app: send-command(string scm-provider, string git-uri, string app-branch => list<string> wars )
               deploy-libs: send-command(list<string> lib-uri)
@@ -97,13 +101,13 @@ application:
             result:
               entry-url: publish-signal(string)
               entry-admin-url: publish-signal(string)
-              solr-url: publish-signal(string)
 
-          required: [db-manage, app-manage, lb-manage, solr-info, db-info, app-output]
+          required: [db-manage, app-manage, lb-manage, zoo-hosts, db-info, app-output]
           configuration: 
             input.db-user: broadleaf
             input.db-password: broadleaf #const
             input.privileges: ["all"] #const
+            input.db-sql-url: ["https://raw.githubusercontent.com/loky9000/broadleaf-component/master/sql/schema.sql", "https://raw.githubusercontent.com/loky9000/broadleaf-component/master/sql/load_full_sort.sql"]
             input.scm-provider: git #const
             input.lib-uri: ["http://repo1.maven.org/maven2/org/apache/tomcat/dbcp/6.0.26/dbcp-6.0.26.jar", "http://repo1.maven.org/maven2/mysql/mysql-connector-java/5.1.6/mysql-connector-java-5.1.6.jar"]
             input.create-context: false
@@ -112,8 +116,8 @@ application:
             input.lbstats-stats-port: "1926"
             input.lbstats-stats-url: "/admin?stats"
             input.solr-collections: ["https://raw.githubusercontent.com/loky9000/broadleaf-component/master/cores.tar.gz"]
-            input.solr-quantity: "3"
-            input.zookeeper-quantity: "4"
+            input.solr-quantity: "2"
+            input.zookeeper-quantity: "2"
 
             configuration.triggers:
               app-output.app-hosts: app-scale
@@ -139,6 +143,8 @@ application:
                       description: user password for new database
                   - privileges: &privileges
                       description: user privileges for new database
+                  - db-sql-url: &db-sql-url
+                      description: sql url
                   - scm-provider: &scm-provider
                       description: "Source provider (Git or SVN)"
                   - app-fork: &app-fork
@@ -196,7 +202,18 @@ application:
                           db-name: "{$.db-name}"
                           db-user: "{$.db-user}"
                           db-password: "{$.db-password}"
-                          privileges: "{$.privileges}"                  
+                          privileges: "{$.privileges}"
+                  - run-sql:
+                      action: serviceCall
+                      precedingPhases: [ grant-db ]
+                      phase: run-sql
+                      parameters:
+                        timeout: 300
+                        service: db-manage
+                        command: run-sql
+                        arguments:
+                          db-name: "{$.db-name}"
+                          sql-url: "{$.db-sql-url}"
                   - build-app:   
                       action: serviceCall
                       phase: build-app
@@ -211,25 +228,10 @@ application:
                           app-branch: "{$.app-branch}"
                       output:
                         warlist: result
-                  - lb-add-solrserver:
-                      action: serviceCall
-                      precedingPhases: [ build-app ]
-                      phase: lb-add-solrserver
-                      parameters:
-                        timeout: 600
-                        service: lb-manage
-                        command: add-servers
-                        arguments:
-                          app-hosts: "{$.props.solr-nodes.solr-hosts}"
-                          app-port: "{$.props.solr-nodes.solr-port}"
-                          lb-bucket: "http://roundrobin:8080/"
-                      output:
-                        result-solr-lb: result
-                          #todo move lb-bucket to launch param
                   - add-solr-support:
                       action: "chefrun"
                       phase: add-solr-support
-                      precedingPhases: [ build-app, lb-add-solrserver ]
+                      precedingPhases: [ build-app ]
                       parameters:
                           isSolo: true
                           roles: [ tomcat-node ]
@@ -237,8 +239,8 @@ application:
                           recipeUrl: "https://raw.github.com/loky9000/broadleaf-component/master/cookbooks.tar.gz"
                           jattrs:
                             broadleaf:
-                              solr_url: "{$.result-solr-lb.entry-url}:8080/solr"
-                              solr_reindex_url: "{$.result-solr-lb.entry-url}:8080/solr/reindex"
+                              solr_url: "{$.props.zoo-hosts.solr-zoo-nodes}"
+                              solr_reindex_url: "{$.props.zoo-hosts.solr-zoo-nodes}"
                   - deploy-libs:
                       action: serviceCall
                       phase: deploy-libs
@@ -258,21 +260,11 @@ application:
                         service: app-manage
                         command: reconfigure
                         arguments:
-                          java-opts: "-Djava.awt.headless=true -Xmx700m -XX:+UseConcMarkSweepGC -Ddatabase.driver=com.mysql.jdbc.Driver -Ddatabase.url=jdbc:mysql://{$.props.db-info.db-host[0]}:{$.props.db-info.db-port}/{$.db-name}?autoReconnect=true -Ddatabase.user=broadleaf -Ddatabase.password=broadleaf"
-                  - restart-tomcat:
-                      action: serviceCall
-                      phase: restart-tomcat
-                      precedingPhases: [ reconfigure-tomcat ]
-                      parameters:
-                        timeout: 600
-                        service: app-manage
-                        command: manage-service
-                        arguments:
-                          service-action: "restart"
+                          java-opts: "-Djava.awt.headless=true -Xmx700m -XX:+UseConcMarkSweepGC -Ddatabase.driver=com.mysql.jdbc.Driver -Ddatabase.url=jdbc:mysql://{$.props.db-info.db-host[0]}:{$.props.db-info.db-port}/{$.db-name}?autoReconnect=true -Ddatabase.user={$.db-user} -Ddatabase.password={$.db-password}"
                   - deploy-war:
                       action: serviceCall
                       phase: deploy-war
-                      precedingPhases: [ build-app, add-solr-support, deploy-libs, reconfigure-tomcat, restart-tomcat ]
+                      precedingPhases: [ build-app, add-solr-support, reconfigure-tomcat ]
                       parameters:
                         timeout: 600
                         service: app-manage
@@ -286,7 +278,7 @@ application:
                   - deploy-admin-war:
                       action: serviceCall
                       phase: deploy-admin-war
-                      precedingPhases: [ build-app, deploy-libs, reconfigure-tomcat, restart-tomcat, deploy-war ]
+                      precedingPhases: [ deploy-war ]
                       parameters:
                         timeout: 600
                         service: app-manage
@@ -312,20 +304,18 @@ application:
                       output:
                         result-lb: result
                           #todo move lb-bucket to launch param 
-                  - await300seconds:
+                  - await500seconds:
                       action: wait
                       description: Sample step that waits for 5 minute.
                       phase: sync
                       precedingPhases: [lb-add-server]
                       parameters:
-                        delay: 300   
+                        delay: 500   
                 return:
                   entry-url:
                     value: "{$.result-lb.entry-url}"
                   entry-admin-url:
                     value: "{$.result-lb.entry-url}/admin"
-                  solr-url:
-                    value: "{$.result-solr-lb.entry-url}"
               
               app-scale:
                 steps:
@@ -349,7 +339,7 @@ application:
                       precedingPhases: [ get-env-props ]
                       phase: grant-db
                       parameters:
-                        timeout: 600
+                        timeout: 800
                         service: db-manage
                         command: change-grants
                         arguments:
@@ -363,7 +353,7 @@ application:
                       phase: build-app
                       precedingPhases: [ get-env-props ]
                       parameters:
-                        timeout: 600
+                        timeout: 800
                         service: app-manage
                         command: build-app
                         arguments:
@@ -383,14 +373,14 @@ application:
                           recipeUrl: "https://raw.github.com/loky9000/broadleaf-component/master/cookbooks.tar.gz"
                           jattrs:
                             broadleaf:
-                              solr_url: "{$.props.lb-output.lb-stats.lb-host}:8080/solr"
-                              solr_reindex_url: "{$.props.lb-output.lb-stats.lb-host}:8080/solr/reindex"
+                              solr_url: "{$.props.zoo-hosts.solr-zoo-nodes}"
+                              solr_reindex_url: "{$.props.zoo-hosts.solr-zoo-nodes}"
                   - deploy-libs:
                       action: serviceCall
                       phase: deploy-libs
                       precedingPhases: [ get-env-props ]
                       parameters:
-                        timeout: 600
+                        timeout: 800
                         service: app-manage
                         command: deploy-libs
                         arguments:
@@ -398,27 +388,24 @@ application:
                   - reconfigure-tomcat:
                       action: serviceCall
                       phase: reconfigure-tomcat
-                      precedingPhases: [ deploy-libs ]
+                      precedingPhases: [ deploy-libs, add-solr-support ]
                       parameters:
-                        timeout: 600
+                        timeout: 800
                         service: app-manage
                         command: reconfigure
                         arguments:
-                          java-opts: "-Djava.awt.headless=true -Xmx700m -XX:+UseConcMarkSweepGC -Ddatabase.driver=com.mysql.jdbc.Driver -Ddatabase.url=jdbc:mysql://{$.props.db-info.db-host[0]}:{$.props.db-info.db-port}/{$.db-name}?autoReconnect=true -Ddatabase.user=broadleaf -Ddatabase.password=broadleaf"
-                  - restart-tomcat:
-                      action: serviceCall
-                      phase: restart-tomcat
-                      precedingPhases: [ reconfigure-tomcat ]
+                          java-opts: "-Djava.awt.headless=true -Xmx700m -XX:+UseConcMarkSweepGC -Ddatabase.driver=com.mysql.jdbc.Driver -Ddatabase.url=jdbc:mysql://{$.props.db-info.db-host[0]}:{$.props.db-info.db-port}/{$.db-name}?autoReconnect=true -Ddatabase.user={$.db-user} -Ddatabase.password={$.db-password}"        
+                  - await300seconds:
+                      action: wait
+                      description: Sample step that waits for 6 minute.
+                      phase: wait-before-root
+                      precedingPhases: [reconfigure-tomcat]
                       parameters:
-                        timeout: 600
-                        service: app-manage
-                        command: manage-service
-                        arguments:
-                          service-action: "restart"        
+                        delay: 300
                   - deploy-war:
                       action: serviceCall
                       phase: deploy-war
-                      precedingPhases: [ build-app, deploy-libs, reconfigure-tomcat, restart-tomcat ]
+                      precedingPhases: [ build-app, add-solr-support, reconfigure-tomcat, wait-before-root ]
                       parameters:
                         timeout: 600
                         service: app-manage
@@ -429,12 +416,19 @@ application:
                           appname: "ROOT.war"
                           context-attrs: {}
                           context-nodes: []                            
+                  - await350seconds:
+                      action: wait
+                      description: Sample step that waits for 6 minute.
+                      phase: wait-before-admin
+                      precedingPhases: [ deploy-war ]
+                      parameters:
+                        delay: 350                    
                   - deploy-admin-war:
                       action: serviceCall
                       phase: deploy-admin-war
-                      precedingPhases: [ build-app, deploy-libs, reconfigure-tomcat, restart-tomcat, deploy-war ]
+                      precedingPhases: [ build-app, add-solr-support, wait-before-admin ]
                       parameters:
-                        timeout: 600
+                        timeout: 800
                         service: app-manage
                         command: deploy-war
                         arguments:
@@ -445,23 +439,23 @@ application:
                            context-nodes: [] 
                   - lb-reconfigure-servers:
                       action: serviceCall
-                      precedingPhases: [ deploy-war ]
+                      precedingPhases: [ deploy-admin-war ]
                       phase: lb-reconfigure-servers
                       parameters:
-                        timeout: 600
+                        timeout: 800
                         service: lb-manage
                         command: reconfigure-servers
                         arguments:
                           app-hosts: "{$.props.app-output.app-hosts}"
                           app-port: "{$.props.app-output.app-port}"
                           lb-bucket: "http://roundrobin:80/"
-                  - await300seconds:
+                  - await350seconds:
                       action: wait
-                      description: Sample step that waits for 5 minute.
+                      description: Sample step that waits for 6 minute.
                       phase: sync
                       precedingPhases: [lb-reconfigure-servers]
                       parameters:
-                        delay: 300   
+                        delay: 350   
               rebuild-app:
                 steps:
                   - get-env-props:
@@ -484,7 +478,7 @@ application:
                       phase: build-app
                       precedingPhases: [ get-env-props ]
                       parameters:
-                        timeout: 600
+                        timeout: 800
                         service: app-manage
                         command: build-app
                         arguments:
@@ -504,42 +498,22 @@ application:
                           recipeUrl: "https://raw.github.com/loky9000/broadleaf-component/master/cookbooks.tar.gz"
                           jattrs:
                             broadleaf:
-                              solr_url: "{$.props.lb-output.lb-stats.lb-host}:8080/solr"
-                              solr_reindex_url: "{$.props.lb-output.lb-stats.lb-host}:8080/solr/reindex"
-                  - deploy-libs:
-                      action: serviceCall
-                      phase: deploy-libs
-                      precedingPhases: [ get-env-props ]
-                      parameters:
-                        timeout: 600
-                        service: app-manage
-                        command: deploy-libs
-                        arguments:
-                          lib-uri: "{$.lib-uri}"
+                              solr_url: "{$.props.zoo-hosts.solr-zoo-nodes}"
+                              solr_reindex_url: "{$.props.zoo-hosts.solr-zoo-nodes}"
                   - reconfigure-tomcat:
                       action: serviceCall
                       phase: reconfigure-tomcat
-                      precedingPhases: [ deploy-libs ]
+                      precedingPhases: [ add-solr-support ]
                       parameters:
-                        timeout: 600
+                        timeout: 800
                         service: app-manage
                         command: reconfigure
                         arguments:
-                          java-opts: "-Djava.awt.headless=true -Xmx700m -XX:+UseConcMarkSweepGC -Ddatabase.driver=com.mysql.jdbc.Driver -Ddatabase.url=jdbc:mysql://{$.props.db-info.db-host[0]}:{$.props.db-info.db-port}/{$.db-name}?autoReconnect=true -Ddatabase.user=broadleaf -Ddatabase.password=broadleaf"
-                  - restart-tomcat:
-                      action: serviceCall
-                      phase: restart-tomcat
-                      precedingPhases: [ reconfigure-tomcat ]
-                      parameters:
-                        timeout: 600
-                        service: app-manage
-                        command: manage-service
-                        arguments:
-                          service-action: "restart"        
+                          java-opts:  "-Djava.awt.headless=true -Xmx700m -XX:+UseConcMarkSweepGC -Ddatabase.driver=com.mysql.jdbc.Driver -Ddatabase.url=jdbc:mysql://{$.props.db-info.db-host[0]}:{$.props.db-info.db-port}/{$.db-name}?autoReconnect=true -Ddatabase.user={$.db-user} -Ddatabase.password={$.db-password}"       
                   - deploy-war:
                       action: serviceCall
                       phase: deploy-war
-                      precedingPhases: [ build-app, deploy-libs, reconfigure-tomcat, restart-tomcat ]
+                      precedingPhases: [ build-app, add-solr-support ]
                       parameters:
                         timeout: 600
                         service: app-manage
@@ -549,13 +523,13 @@ application:
                           uri: "{$.warlist.wars[1]}"
                           appname: "ROOT.war"
                           context-attrs: {}
-                          context-nodes: []                            
+                          context-nodes: []                                            
                   - deploy-admin-war:
                       action: serviceCall
                       phase: deploy-admin-war
-                      precedingPhases: [ build-app, deploy-libs, reconfigure-tomcat, restart-tomcat, deploy-war ]
+                      precedingPhases: [ deploy-war ]
                       parameters:
-                        timeout: 600
+                        timeout: 800
                         service: app-manage
                         command: deploy-war
                         arguments:
@@ -563,14 +537,14 @@ application:
                            uri: "{$.warlist.wars[0]}"
                            appname: "admin.war"
                            context-attrs: {}
-                           context-nodes: []
-                  - await300seconds:
+                           context-nodes: [] 
+                  - await350seconds:
                       action: wait
-                      description: Sample step that waits for 5 minute.
+                      description: Sample step that waits for 6 minute.
                       phase: sync
                       precedingPhases: [deploy-admin-war]
                       parameters:
-                        delay: 300   
+                        delay: 350   
               destroy:
                 steps: []
 
@@ -585,6 +559,7 @@ application:
         management:
           create-db: receive-command(string db-name)          
           change-grants: receive-command(list<string> app-hosts, string db-name, string db-user, string db-password, list<string> privileges)
+          run-sql: receive-command(string db-name, list<string> sql-url)
         output:
           dbms: publish-signal(object)
           db-host: publish-signal(list<string>)
@@ -636,8 +611,8 @@ application:
               zookeeper-quantity: configuration(string)
               solr-collections: configuration(list<string>)
            nodes:
-              solr-hosts: publish-signal(list<string>)
-              solr-port: publish-signal(string)
+              solr-zoo-nodes: publish-signal(string)
+              zoo-ui: publish-signal(list<string>)
            endpoints:
               solr-url: publish-signal(list<string>)
           
