@@ -135,15 +135,15 @@
         <bean id="solrServer" class="org.apache.solr.client.solrj.impl.CloudSolrServer"> 
              <constructor-arg value="<%= @solr_url %>" /> 
              <property name="defaultCollection" value="primary" />
-        </bean> 
-         <bean id="solrReindexServer" class="org.apache.solr.client.solrj.impl.CloudSolrServer"> 
-             <constructor-arg value="<%= @solr_reindex_url %>" /> 
-             <property name="defaultCollection" value="primary" />
-         </bean> 
+        </bean>
+        <!--   <bean id="solrReindexServer" class="org.apache.solr.client.solrj.impl.CloudSolrServer"> -->
+      <!--       <constructor-arg value="10.210.185.233:2181,10.249.171.183:2181,10.208.195.73:2181" /> -->
+      <!--       <property name="defaultCollection" value="primary" />-->
+      <!--   </bean> -->
     <bean id="blSearchService" class="org.broadleafcommerce.core.search.service.solr.SolrSearchServiceImpl">
         <constructor-arg name="solrServer" ref="${solr.source}" />
-        <constructor-arg name="reindexServer" ref="${solr.source.reindex}" />
-    </bean> 
+    <!--    <constructor-arg name="reindexServer" ref="${solr.source.reindex}" /> -->
+    </bean>
     <bean id="rebuildIndexJobDetail" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
         <property name="targetObject" ref="blSearchService" />
         <property name="targetMethod" value="rebuildIndex" />
