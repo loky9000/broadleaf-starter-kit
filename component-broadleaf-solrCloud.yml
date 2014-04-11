@@ -3,7 +3,7 @@ application:
     input.db-name: broadleaf
     input.lb-bucket: http://roundrobin:80
     input.app-fork: loky9000
-    input.app-branch: solr-cloud #solr-green
+    input.app-branch: solr-cloud # solr-green
     input.app-quantity: "1"
     input.app-image: "us-east-1/ami-967edcff"
     input.app-identity: "ubuntu"
@@ -116,8 +116,8 @@ application:
             input.lbstats-stats-port: "1926"
             input.lbstats-stats-url: "/admin?stats"
             input.solr-collections: ["https://raw.githubusercontent.com/loky9000/broadleaf-component/master/cores.tar.gz"]
-            input.solr-quantity: "2"
-            input.zookeeper-quantity: "2"
+            input.solr-quantity: "3"
+            input.zookeeper-quantity: "4"
 
             configuration.triggers:
               app-output.app-hosts: app-scale
@@ -304,13 +304,13 @@ application:
                       output:
                         result-lb: result
                           #todo move lb-bucket to launch param 
-                  - await500seconds:
+                  - await350seconds:
                       action: wait
-                      description: Sample step that waits for 5 minute.
+                      description: Sample step that waits for 6 minute.
                       phase: sync
                       precedingPhases: [lb-add-server]
                       parameters:
-                        delay: 500   
+                        delay: 350   
                 return:
                   entry-url:
                     value: "{$.result-lb.entry-url}"
@@ -324,10 +324,20 @@ application:
                       phase: get-env-props
                       output:
                         props: result
+                  - cleanup:
+                      action: provisionVms
+                      phase: cleanupTomcatNodes
+                      precedingPhases: [ get-env-props ]
+                      parameters:
+                        roleName: tomcat-node
+                        hardwareId: ""
+                        vmIdentity: "{$.identity}"
+                        retryCount: 1
+                        targetQuantity: 0
                   - provision-node:
                        action: provisionVms
                        phase: provisionAgent
-                       precedingPhases: [ get-env-props ]
+                       precedingPhases: [ cleanupTomcatNodes ]
                        parameters:
                          roleName: tomcat-node
                          hardwareId: ""
@@ -395,17 +405,10 @@ application:
                         command: reconfigure
                         arguments:
                           java-opts: "-Djava.awt.headless=true -Xmx700m -XX:+UseConcMarkSweepGC -Ddatabase.driver=com.mysql.jdbc.Driver -Ddatabase.url=jdbc:mysql://{$.props.db-info.db-host[0]}:{$.props.db-info.db-port}/{$.db-name}?autoReconnect=true -Ddatabase.user={$.db-user} -Ddatabase.password={$.db-password}"        
-                  - await300seconds:
-                      action: wait
-                      description: Sample step that waits for 6 minute.
-                      phase: wait-before-root
-                      precedingPhases: [reconfigure-tomcat]
-                      parameters:
-                        delay: 300
                   - deploy-war:
                       action: serviceCall
                       phase: deploy-war
-                      precedingPhases: [ build-app, add-solr-support, reconfigure-tomcat, wait-before-root ]
+                      precedingPhases: [ build-app, add-solr-support, reconfigure-tomcat ]
                       parameters:
                         timeout: 600
                         service: app-manage
@@ -415,18 +418,11 @@ application:
                           uri: "{$.warlist.wars[1]}"
                           appname: "ROOT.war"
                           context-attrs: {}
-                          context-nodes: []                            
-                  - await350seconds:
-                      action: wait
-                      description: Sample step that waits for 6 minute.
-                      phase: wait-before-admin
-                      precedingPhases: [ deploy-war ]
-                      parameters:
-                        delay: 350                    
+                          context-nodes: []                                               
                   - deploy-admin-war:
                       action: serviceCall
                       phase: deploy-admin-war
-                      precedingPhases: [ build-app, add-solr-support, wait-before-admin ]
+                      precedingPhases: [ build-app, add-solr-support ]
                       parameters:
                         timeout: 800
                         service: app-manage
