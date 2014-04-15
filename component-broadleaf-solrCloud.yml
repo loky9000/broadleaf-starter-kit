@@ -12,7 +12,7 @@ application:
     input.solr-quantity: "4"
     input.zookeeper-quantity: "3"
 
-    
+     
     
   bindings:
     - [main.workflow, db]
@@ -73,17 +73,18 @@ application:
               zookeeper-quantity: configuration(string)
             db-info:
               dbms: consume-signal(object)
-              db-host: consume-signal(list<string>)
-              db-port: consume-signal(string)
+              db-host: consume-signal(string)
+              db-port: consume-signal(int)
             solr-info:
               solr-url: consume-signal(list<string>)
             zoo-hosts:
               solr-zoo-nodes: consume-signal(string)
               zoo-ui: consume-signal(list<string>)
             db-manage:
-              create-db: send-command(string db-name)
-              change-grants: send-command(list<string> app-hosts, string db-name, string db-user, string db-password, list<string> privileges)
-              run-sql: send-command(string db-name, list<string> sql-url)
+              schema: send-command(string db-user, string db-user-password, list<string> db-user-privileges => object connection)
+              db: send-command(string db-name, string db-action)
+              user: send-command(list<string> app-hosts, string db-name, string db-user, string db-user-password, list<string> db-user-privileges, string user-action)
+              file-query: send-command(object connection, list<string> sql-url)
             app-manage:
               build-app: send-command(string scm-provider, string git-uri, string app-branch => list<string> wars )
               deploy-libs: send-command(list<string> lib-uri)
@@ -123,6 +124,7 @@ application:
               app-output.app-hosts: app-scale
               input.app-fork: rebuild-app
               input.app-branch: rebuild-app
+
 
             configuration.propagateStatus: [ app-scale, rebuild-app ]
 
@@ -186,34 +188,39 @@ application:
                       parameters:
                         timeout: 600
                         service: db-manage
-                        command: create-db
+                        command: db
                         arguments:
                           db-name: "{$.db-name}"
-                  - grant-db:
+                          db-action: "create"
+                  - create-db-user:
                       action: serviceCall
+                      phase: create-db-user
                       precedingPhases: [ create-db ]
-                      phase: grant-db
                       parameters:
                         timeout: 600
                         service: db-manage
-                        command: change-grants
+                        command: user
                         arguments:
                           app-hosts: "{$.props.app-output.app-hosts}"
                           db-name: "{$.db-name}"
                           db-user: "{$.db-user}"
-                          db-password: "{$.db-password}"
-                          privileges: "{$.privileges}"
+                          db-user-password: "{$.db-password}"
+                          db-user-privileges: "{$.privileges}"
+                          user-action: "grant"
                   - run-sql:
                       action: serviceCall
-                      precedingPhases: [ grant-db ]
+                      precedingPhases: [ create-db-user ]
                       phase: run-sql
                       parameters:
                         timeout: 300
                         service: db-manage
-                        command: run-sql
+                        command: file-query
                         arguments:
-                          db-name: "{$.db-name}"
                           sql-url: "{$.db-sql-url}"
+                          connection:
+                             db-name: "{$.db-name}"
+                             db-user: "{$.db-user}"
+                             db-user-password: "{$.db-password}"                        
                   - build-app:   
                       action: serviceCall
                       phase: build-app
@@ -260,7 +267,7 @@ application:
                         service: app-manage
                         command: reconfigure
                         arguments:
-                          java-opts: "-Djava.awt.headless=true -Xmx700m -XX:+UseConcMarkSweepGC -Ddatabase.driver=com.mysql.jdbc.Driver -Ddatabase.url=jdbc:mysql://{$.props.db-info.db-host[0]}:{$.props.db-info.db-port}/{$.db-name}?autoReconnect=true -Ddatabase.user={$.db-user} -Ddatabase.password={$.db-password}"
+                          java-opts: "-Djava.awt.headless=true -Xmx700m -XX:+UseConcMarkSweepGC -Ddatabase.driver=com.mysql.jdbc.Driver -Ddatabase.url=jdbc:mysql://{$.props.db-info.db-host}:{$.props.db-info.db-port}/{$.db-name}?autoReconnect=true -Ddatabase.user={$.db-user} -Ddatabase.password={$.db-password}"
                   - deploy-war:
                       action: serviceCall
                       phase: deploy-war
@@ -344,20 +351,21 @@ application:
                          vmIdentity: "{$.identity}"
                          retryCount: 1
                          staticIps: "{$.props.app-output.app-hosts}"
-                  - grant-db:
+                  - grant-db-user:
                       action: serviceCall
+                      phase: create-db-user
                       precedingPhases: [ get-env-props ]
-                      phase: grant-db
                       parameters:
-                        timeout: 800
+                        timeout: 600
                         service: db-manage
-                        command: change-grants
+                        command: user
                         arguments:
                           app-hosts: "{$.props.app-output.app-hosts}"
                           db-name: "{$.db-name}"
                           db-user: "{$.db-user}"
-                          db-password: "{$.db-password}"
-                          privileges: "{$.privileges}"
+                          db-user-password: "{$.db-password}"
+                          db-user-privileges: "{$.privileges}"
+                          user-action: "grant"
                   - build-app:
                       action: serviceCall
                       phase: build-app
@@ -404,7 +412,7 @@ application:
                         service: app-manage
                         command: reconfigure
                         arguments:
-                          java-opts: "-Djava.awt.headless=true -Xmx700m -XX:+UseConcMarkSweepGC -Ddatabase.driver=com.mysql.jdbc.Driver -Ddatabase.url=jdbc:mysql://{$.props.db-info.db-host[0]}:{$.props.db-info.db-port}/{$.db-name}?autoReconnect=true -Ddatabase.user={$.db-user} -Ddatabase.password={$.db-password}"        
+                          java-opts: "-Djava.awt.headless=true -Xmx700m -XX:+UseConcMarkSweepGC -Ddatabase.driver=com.mysql.jdbc.Driver -Ddatabase.url=jdbc:mysql://{$.props.db-info.db-host}:{$.props.db-info.db-port}/{$.db-name}?autoReconnect=true -Ddatabase.user={$.db-user} -Ddatabase.password={$.db-password}"        
                   - deploy-war:
                       action: serviceCall
                       phase: deploy-war
@@ -505,7 +513,7 @@ application:
                         service: app-manage
                         command: reconfigure
                         arguments:
-                          java-opts:  "-Djava.awt.headless=true -Xmx700m -XX:+UseConcMarkSweepGC -Ddatabase.driver=com.mysql.jdbc.Driver -Ddatabase.url=jdbc:mysql://{$.props.db-info.db-host[0]}:{$.props.db-info.db-port}/{$.db-name}?autoReconnect=true -Ddatabase.user={$.db-user} -Ddatabase.password={$.db-password}"       
+                          java-opts:  "-Djava.awt.headless=true -Xmx700m -XX:+UseConcMarkSweepGC -Ddatabase.driver=com.mysql.jdbc.Driver -Ddatabase.url=jdbc:mysql://{$.props.db-info.db-host}:{$.props.db-info.db-port}/{$.db-name}?autoReconnect=true -Ddatabase.user={$.db-user} -Ddatabase.password={$.db-password}"       
                   - deploy-war:
                       action: serviceCall
                       phase: deploy-war
@@ -547,24 +555,29 @@ application:
     db:
       type: reference.Submodule
       configuration:
-        __locator.application-id: "533bf8dbe4b0a12dbc347cb3"
+        __locator.application-id: "mysql-component-new"
       interfaces:
         input:
-          db-version: configuration(string)
+          db-port: configuration(int)
           db-root-password: configuration(string)
-        management:
-          create-db: receive-command(string db-name)          
-          change-grants: receive-command(list<string> app-hosts, string db-name, string db-user, string db-password, list<string> privileges)
-          run-sql: receive-command(string db-name, list<string> sql-url)
+          image: configuration(string)
+          image-user: configuration(string)
+          instance-size: configuration(string)
+          recipe-url: configuration(string)
+        manage:
+          schema: receive-command(string db-user, string db-user-password, list<string> db-user-privileges => object connection)
+          db: receive-command(string db-name, string db-action)
+          user: receive-command(list<string> app-hosts, string db-name, string db-user, string db-user-password, list<string> db-user-privileges, string user-action)
+          file-query: receive-command(object connection, list<string> sql-url)
         output:
           dbms: publish-signal(object)
-          db-host: publish-signal(list<string>)
-          db-port: publish-signal(string)
-
+          db-port: publish-signal(int)
+          db-host: publish-signal(string)
+          
     app:
       type: reference.Submodule
       configuration:
-        __locator.application-id: "533bf86ce4b0a12dbc347cb1"
+        __locator.application-id: "component-tomcat-broadleaf"
       interfaces:
         input:
           image: configuration(string)
@@ -584,7 +597,7 @@ application:
     lb:
       type: reference.Submodule
       configuration:
-        __locator.application-id: "533bf96ce4b0a12dbc347cb5"
+        __locator.application-id: "component-haproxy"
       interfaces:
         input:
           stats-user: configuration(string)
@@ -600,7 +613,7 @@ application:
     solr:
         type: reference.Submodule
         configuration:
-          __locator.application-id: "533bf842e4b0a12dbc347cb0"
+          __locator.application-id: "SolrCloud"
         interfaces:   
            input:
               solr-quantity: configuration(string)
@@ -611,4 +624,4 @@ application:
               zoo-ui: publish-signal(list<string>)
            endpoints:
               solr-url: publish-signal(list<string>)
-          
+   
