@@ -1,0 +1,20 @@
+env:
+  global:
+  - QUBELL_TENANT=https://express.qubell.com
+  - secure: I1liE6XXp/EZgbrFWKw9ogtwoUrPjNpcXzBUJ5gKuHr1Ec+H5apUON6og4BA1KSpPVbJhYoa9IjVocarKXXCr1YNaXUIYXqfNpeD82aNG0Si8gtyUkOAhZo8FznInXQAlvJ1jVwbwpJ5pXJwXaHge/BCrVOYLmI+f6wEKmwErBQ=
+  - secure: PInyqCn2U4aByHI0OE4AWbsg6EI4dbGYpOyk2xBeoBBXNbnTJH04y4Z6JAxiyBJkcsLMxbIcw0UOKNqs50B/5dFyZ0DPmsGweG87RXO/3sAwC7L/8xAY3sxL+eymZ5mN3pKF0BwIVbKm75GQJ65dESYsD2tTrGSSbt9+4x3LR/w=
+  - secure: NhDWR85QA84Lk84EY+8TJVQHbnsA3q6twrXuFZzwaHvkKFbOSfKvkV0hugA+srFMPjhiyJzqlnnKqwdjbamdDeufECTxVXHvWlw9p5XBdjAngvhjsjlNbvrLv++w//e7I+3YEfIytsGmtxtDERl5G1KGZ4+Dkmx5cLBmajLXCjw=
+  - secure: N9SUx0caNnEqbqCndhdQ1ghQ23w7tSOzUtR8qoYU2PCNGqU3GiNMP0EIxI2gh8wvgeqBAcXzRZRwH1LA1WyGc2yRGxo4AAAB6tK7Pygm3RphK9nWgrHhHfEucmLBYJx2CBeInwEa5pERIwoXkyUP77nV0+5IAOpNVtssqsAOQHI=
+  - secure: Bd52k4X0WxJtuaC7CnH2m3q2B9phW46NvjLXe27deN2IYKPFcEb+1R1KGup7Uj3bRXbBX+ueC+/3y+UjteQRmNo7VCUFECnswAKmNuo1u4mb6+Uo8bKCyRE9VmAzpDP7YtToKZzyOkd1j+0VHuoYS7M3LEZdyogBBqe1J90E8vE=
+  - secure: Q/rneMLrCZV/GBXhMUIpbhi+A1iNC7iXtVdJA0gcL0xejuTd2h20KFioTzGufxLrsn7JvxoGWglfdCSwEZObZr1iS/cCyuTS/7MZd1XQeu8R34+9dAGfnPJfvMryY3bvgjb8LnpBpOyXzjjDvVFfxvu/QyQJSKARPHQrxtfesQk=
+  - secure: WVh/ODUIxWhDRM227nE6p4yNsnaKYo3W1/N8rXtNG2G/wwY/T+arW2YPlvIwx11PD9DJZCrAarWkfwCO5L+xZS8u34cbw6gIIAsSN6BvOM1+LNRfZr5E/GzR3r2N/kx6oR+g2iP0ks6KopZSBQTfHYr3vuvGylLIm9eseXtlZRM=
+  - secure: IwmoaXOMUn38j3p/JTUkgKhInHWURkfXyMA+bvr18HOUjFba2A1ggndfZDiCE9lSuarpa0h03AVeuleyX9iFzv6n4loPwlWI+4NOjaNIJ15cmKFpuFOs1Iy8FwlGb5mhbr3nRdZwIB9F4bTuRsj0lF1ejJduQJgRn/cT5NWoMTE=
+  - secure: aA9KIMuOSkeCnqDxM3KGe7B6j1Ljx4nG4A1cMNVi1rqtAwA/+qlAvdKv+ADHgGK9dz8Cykva3IxR9xj2NXvgfnmQkGVDn8LqrIFfqMvQKfsYqZPSqeHOwzWKk+e0rpqBGneq5pNT+uYM3QcP8/kU3XUMQr578U7UGiatCu0e80g=
+language: python
+python:
+- '2.7'
+install: pip install -r test/requirements.txt
+before_script:
+- gem install travis-artifacts --no-ri --no-rdoc
+- git submodule update --init --recursive
+script: ./build.sh
