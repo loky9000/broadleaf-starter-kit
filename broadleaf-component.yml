@@ -8,7 +8,7 @@ application:
     input.app-image: "us-east-1/ami-967edcff"
     input.app-identity: "ubuntu"
     input.instance-size: "m1.small"
-    input.solr-collections: ["https://raw.githubusercontent.com/loky9000/broadleaf-component/master/cores.tar.gz"]
+    input.solr-collections: ["https://raw.githubusercontent.com/loky9000/DemoSite/solr-cloud/core/src/main/resources/cores/cores.tar.gz"]
     input.solr-quantity: "4"
     input.zookeeper-quantity: "3"
 
@@ -88,7 +88,7 @@ application:
             app-manage:
               build-app: send-command(string scm-provider, string git-uri, string app-branch => list<string> wars )
               deploy-libs: send-command(list<string> lib-uri)
-              deploy-war: send-command(string uri, string appname, bool create-context, object context-attrs, object context-nodes)
+              deploy-war: send-command(string uri, string path, object context-attrs, object context-nodes)
               reconfigure: send-command(string java-opts)
               manage-service: send-command(string service-action)
             app-output:
@@ -116,7 +116,7 @@ application:
             input.lbstats-stats-pass: pa55w0rd
             input.lbstats-stats-port: "1926"
             input.lbstats-stats-url: "/admin?stats"
-            input.solr-collections: ["https://raw.githubusercontent.com/loky9000/broadleaf-component/master/cores.tar.gz"]
+            input.solr-collections: ["https://raw.githubusercontent.com/loky9000/DemoSite/solr-cloud/core/src/main/resources/cores/cores.tar.gz" ]
             input.solr-quantity: "3"
             input.zookeeper-quantity: "4"
 
@@ -277,9 +277,8 @@ application:
                         service: app-manage
                         command: deploy-war
                         arguments:
-                          create-context: "{$.create-context}"
                           uri: "{$.warlist.wars[1]}"
-                          appname: "ROOT.war"
+                          path: "/"
                           context-attrs: {}
                           context-nodes: []                            
                   - deploy-admin-war:
@@ -290,10 +289,9 @@ application:
                         timeout: 600
                         service: app-manage
                         command: deploy-war
-                        arguments:
-                           create-context: "{$.create-context}" 
+                        arguments: 
                            uri: "{$.warlist.wars[0]}"
-                           appname: "admin.war"
+                           path: "/admin"
                            context-attrs: {}
                            context-nodes: []                  
                   - lb-add-server:
@@ -422,9 +420,8 @@ application:
                         service: app-manage
                         command: deploy-war
                         arguments:
-                          create-context: "{$.create-context}"
                           uri: "{$.warlist.wars[1]}"
-                          appname: "ROOT.war"
+                          path: "/"
                           context-attrs: {}
                           context-nodes: []                                               
                   - deploy-admin-war:
@@ -436,9 +433,8 @@ application:
                         service: app-manage
                         command: deploy-war
                         arguments:
-                           create-context: "{$.create-context}" 
                            uri: "{$.warlist.wars[0]}"
-                           appname: "admin.war"
+                           path: "/admin"
                            context-attrs: {}
                            context-nodes: [] 
                   - lb-reconfigure-servers:
@@ -523,9 +519,8 @@ application:
                         service: app-manage
                         command: deploy-war
                         arguments:
-                          create-context: "{$.create-context}"
                           uri: "{$.warlist.wars[1]}"
-                          appname: "ROOT.war"
+                          path: "/"
                           context-attrs: {}
                           context-nodes: []                                            
                   - deploy-admin-war:
@@ -536,10 +531,9 @@ application:
                         timeout: 800
                         service: app-manage
                         command: deploy-war
-                        arguments:
-                           create-context: "{$.create-context}" 
+                        arguments: 
                            uri: "{$.warlist.wars[0]}"
-                           appname: "admin.war"
+                           path: "/admin"
                            context-attrs: {}
                            context-nodes: [] 
                   - await350seconds:
@@ -555,7 +549,7 @@ application:
     db:
       type: reference.Submodule
       configuration:
-        __locator.application-id: "Database"
+        __locator.application-id: "mysql-component-new"
       interfaces:
         input:
           db-port: configuration(int)
@@ -577,7 +571,7 @@ application:
     app:
       type: reference.Submodule
       configuration:
-        __locator.application-id: "Application Server"
+        __locator.application-id: "tomcat-bazar"
       interfaces:
         input:
           image: configuration(string)
@@ -587,7 +581,7 @@ application:
         management:
           build-app: receive-command(string scm-provider, string git-uri, string app-branch => list<string> wars)
           deploy-libs: receive-command(list<string> lib-uri)
-          deploy-war: receive-command(string uri, string appname, bool create-context, object context-attrs, object context-nodes)
+          deploy-war: receive-command(string uri, string path, object context-attrs, object context-nodes)
           reconfigure: receive-command(string java-opts)
           manage-service: receive-command(string service-action)
         output:
@@ -597,7 +591,7 @@ application:
     lb:
       type: reference.Submodule
       configuration:
-        __locator.application-id: "Load Balancer"
+        __locator.application-id: "component-haproxy"
       interfaces:
         input:
           stats-user: configuration(string)
@@ -613,7 +607,7 @@ application:
     solr:
         type: reference.Submodule
         configuration:
-          __locator.application-id: "Solr Search"
+          __locator.application-id: "SolrCloud"
         interfaces:   
            input:
               solr-quantity: configuration(string)
