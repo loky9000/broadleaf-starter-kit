@@ -5,7 +5,7 @@ from qubell.api.private.testing import instance, environment, workflow, values
 
 
 @environment({
-    "default": {}
+    "default": {},
          "AmazonEC2_CentOS_63": {
         "policies": [{
             "action": "provisionVms",
