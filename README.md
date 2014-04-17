@@ -15,7 +15,7 @@ Features
  - Install Broadleaf DemoSite with Admin panel  on one or more Tomcat nodes in parallel 
  - Install Haproxy as load balance for application nodes
  - Install SolrCloud with Zookeeper ensemble and point application to Zookeper hosts  
- - Scale app and back in application nodes
+ - Scale app and down application cluster
  - Rebuild application by switching git branch
     
 Configurations
