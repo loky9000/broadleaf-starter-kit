@@ -73,7 +73,8 @@ class ComponentTestCase(BaseComponentTestCase):
         "name": "Solr Search",
         "url": "https://raw.githubusercontent.com/loky9000/solr/master/component-solr-zoo.yml",
         "launch": False
-    }, { name "component-zookeeper",
+    }, { 
+        "name": "component-zookeeper",
         "url": "https://raw.githubusercontent.com/loky9000/zookeeper/master/component-zookeeper-dev.yml",
         "launch": False
    }]
