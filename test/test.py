@@ -64,7 +64,7 @@ class ComponentTestCase(BaseComponentTestCase):
         assert result == 0
     
     @instance(byApplication=name)
-    def test_solr_search(self, instance, host):
+    def test_solr_search(self, instance):
         host = instance.returnValues['endpoints.sorl-url'][0]
         resp = requests.get("http://" + host + "/select/?q=*:*", verify=False)
 
