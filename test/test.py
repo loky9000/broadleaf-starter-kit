@@ -1,4 +1,5 @@
 import os
+import requests
 
 from test_runner import BaseComponentTestCase
 from qubell.api.private.testing import instance, environment, workflow, values
@@ -63,9 +64,9 @@ class ComponentTestCase(BaseComponentTestCase):
         assert result == 0
     
     @instance(byApplication=name)
-    @values({"solr-url": "host"})
+    host = instance.returnValues['endpoints.sorl-url'][0]
     def test_solr_search(self, instance, host):
-        resp = requests.get("http://" + host[0] + "/select/?q=*:*", verify=False)
+        resp = requests.get("http://" + host + "/select/?q=*:*", verify=False)
 
         assert resp.status_code == 200
 
