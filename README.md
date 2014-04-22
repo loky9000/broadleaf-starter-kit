@@ -18,6 +18,7 @@ Features
  - Scale app and down application cluster
  - Rebuild application by switching git branch
     
+    
 Configurations
 --------------
     
