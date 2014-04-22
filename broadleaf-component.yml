@@ -108,7 +108,7 @@ application:
             input.db-user: broadleaf
             input.db-password: broadleaf #const
             input.privileges: ["all"] #const
-            input.db-sql-url: ["https://raw.githubusercontent.com/loky9000/broadleaf-component/master/sql/schema.sql", "https://raw.githubusercontent.com/loky9000/broadleaf-component/master/sql/load_full_sort.sql"]
+            input.db-sql-url: ["https://raw.githubusercontent.com/loky9000/DemoSite/solr-cloud/core/src/main/resources/sql/schema.sql", "https://raw.githubusercontent.com/loky9000/DemoSite/solr-cloud/core/src/main/resources/sql/load_full.sql"]
             input.scm-provider: git #const
             input.lib-uri: ["http://repo1.maven.org/maven2/org/apache/tomcat/dbcp/6.0.26/dbcp-6.0.26.jar", "http://repo1.maven.org/maven2/mysql/mysql-connector-java/5.1.6/mysql-connector-java-5.1.6.jar"]
             input.create-context: false
@@ -549,7 +549,7 @@ application:
     db:
       type: reference.Submodule
       configuration:
-        __locator.application-id: "Database"
+        __locator.application-id: "mysql-component-new"
       interfaces:
         input:
           db-port: configuration(int)
@@ -571,7 +571,7 @@ application:
     app:
       type: reference.Submodule
       configuration:
-        __locator.application-id: "Application Server"
+        __locator.application-id: "tomcat-bazar"
       interfaces:
         input:
           image: configuration(string)
@@ -591,7 +591,7 @@ application:
     lb:
       type: reference.Submodule
       configuration:
-        __locator.application-id: "Load Balancer"
+        __locator.application-id: "component-haproxy"
       interfaces:
         input:
           stats-user: configuration(string)
@@ -607,7 +607,7 @@ application:
     solr:
         type: reference.Submodule
         configuration:
-          __locator.application-id: "Solr Search"
+          __locator.application-id: "SolrCloud"
         interfaces:   
            input:
               solr-quantity: configuration(string)
