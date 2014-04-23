@@ -15,10 +15,23 @@ function check {
     return $status
 }
 
+function berks_install {
+    local INSTALL_PATH=$1
+    
+    berks -d
+    berks install -p ${INSTALL_PATH}
+}
+
 function package {
     local REVISION=$1
+    
+    berks_install berks/cookbooks
+    cd berks
 
     tar -czf ${REPO_NAME}-cookbooks-${REVISION}.tar.gz cookbooks
+    
+    cd ../
+    mv berks/${REPO_NAME}-cookbooks-${REVISION}.tar.gz ${REPO_NAME}-cookbooks-${REVISION}.tar.gz
 }
 
 function publish {
@@ -46,9 +59,9 @@ function publish_github {
     git config user.name ${GIT_NAME}
     git config user.email ${GIT_EMAIL}
     rm -rf *.tar.gz
-    git commit -a -m "CI: Success build ${TRAVIS_BUILD_NUMBER} [skip ci]"
+    git commit -a -m "CI: Success build ${TRAVIS_BUILD_NUMBER} [ci skip]"
     git checkout -b build
-    git push -q origin build:master
+    git push -q origin build:${TRAVIS_BRANCH}
 }
 
 if [[ ${TRAVIS_PULL_REQUEST} == "false" ]]; then
