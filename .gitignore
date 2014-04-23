@@ -6,3 +6,5 @@
 
 # Python files
 *.pyc
+Berksfile.lock
+berks/
