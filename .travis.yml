@@ -19,6 +19,7 @@ env:
   - secure: ekMiUhi4t54d7hViT+HgA6pAfXGWTnpvTYwyR2j920PGHnywzxiF8DIW6XaV8OTKKrlFtobBdI58y9LU5d9/3x0bb5G1ZdGqparmDZPMv0gJHPEJJnKNFxc6DR4y8cyMsfcOZ3Kwcq990PjzkbXK1bxyoMnCe5+puKKS6ssUL7k=
   - secure: ItgV5TWHMcTKU3zYIH61sPSXWbSN4+yP/TJlDn0MhZMUs6H8rzoqxBCXXQQyrHxyx9BYPCJoMntjOPxQTarW6HJrA/RSRwzaOGURBUWDDFDsBXTFqdGTzcl995cKQC/Hz7QocpeUF3ihaVO5fhqn6Nq8Zvg/H3L7+DX+0o04D+8=
   - secure: YYLFOwFv56eyfxlO3fPRLbgjR13QqNZdffMbu+6viudFR3/yuuzgIdz5WoJMFXWrT5NAdgmrKhKcmDSGTkqpQeEYy9QKN1gLjNXSUGX/q/Yenpbt/oFfzvM7PcO9P4vkQpRXwwq+9tOVSbKbVaIIKpqo9NnEVQckL16Usbd4M8Q=
+  - secure: Q2A2XtuZhNO4vNjNwE7asMCPHpf0P27DyuyhV2k14gcqNWbRpjhOSbO1HMScVNUqlNMcUuSVqnGA74Ew9IKkj4vPLkvJGRQzm8RToCSNL/fBCftzLIc7oYKFZ0cvKlzwJ38rF4T0/gopXn3eHokGJK+2ZFJz8nCTxL+fUbYzwDE=
 install:
 - sudo apt-get -y -q install python-pip
 - sudo pip install -r test/requirements.txt
