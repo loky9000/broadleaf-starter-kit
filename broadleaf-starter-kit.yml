@@ -607,7 +607,7 @@ application:
     solr:
         type: reference.Submodule
         configuration:
-          __locator.application-id: "Solr Search"
+          __locator.application-id: "Solr Cloud"
         interfaces:   
            input:
               solr-quantity: configuration(string)
