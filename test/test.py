@@ -20,7 +20,7 @@ from qubell.api.private.testing import instance, environment, workflow, values
   }
 })
 class ComponentTestCase(BaseComponentTestCase):
-    name = "broadleaf-starter-kit
+    name = "broadleaf-starter-kit"
     apps = [{
         "name": name,
         "file": os.path.realpath(os.path.join(os.path.dirname(__file__), '../%s.yml' % name))
