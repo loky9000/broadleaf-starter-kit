@@ -5,8 +5,8 @@ application:
     input.app-fork: loky9000
     input.app-branch: solr-cloud # solr-green
     input.app-quantity: "1"
-    input.app-image: "us-east-1/ami-1ba18d72" 
-    input.app-identity: "ec2-user"
+    input.app-image: "us-east-1/ami-967edcff"
+    input.app-identity: "ubuntu"
     input.instance-size: "m1.small"
     input.solr-collections: ["https://raw.githubusercontent.com/loky9000/DemoSite/solr-cloud/core/src/main/resources/cores/cores.tar.gz"]
     input.solr-quantity: "4"
@@ -242,8 +242,8 @@ application:
                       parameters:
                           isSolo: true
                           roles: [ tomcat-node ]
-                          runList: [ "recipe[broadleaf::add-solr-support]" ]
-                          recipeUrl: "https://s3.amazonaws.com/qubell-broadleaf-artifacts/loky9000/broadleaf-component-cookbooks-stable-a99a2b8.tar.gz"
+                          runList: [ "recipe[cookbook-qubell-broadleaf::add-solr-support]" ]
+                          recipeUrl: "https://raw.githubusercontent.com/loky9000/broadleaf-component/1023279230bbc03f950307a0339140ee93c0b2ff/cookbooks.tar.gz"
                           jattrs:
                             broadleaf:
                               solr_url: "{$.props.zoo-hosts.solr-zoo-nodes}"
@@ -309,13 +309,13 @@ application:
                       output:
                         result-lb: result
                           #todo move lb-bucket to launch param 
-                  - await350seconds:
+                  - await200seconds:
                       action: wait
                       description: Sample step that waits for 6 minute.
                       phase: sync
                       precedingPhases: [lb-add-server]
                       parameters:
-                        delay: 350   
+                        delay: 200   
                 return:
                   entry-url:
                     value: "{$.result-lb.entry-url}"
@@ -385,8 +385,8 @@ application:
                       parameters:
                           isSolo: true
                           roles: [ tomcat-node ]
-                          runList: [ "recipe[broadleaf::add-solr-support]" ]
-                          recipeUrl: "https://raw.github.com/loky9000/broadleaf-component/master/cookbooks.tar.gz"
+                          runList: [ "recipe[cookbook-qubell-broadleaf::add-solr-support]" ]
+                          recipeUrl: "https://raw.githubusercontent.com/loky9000/broadleaf-component/1023279230bbc03f950307a0339140ee93c0b2ff/cookbooks.tar.gz"
                           jattrs:
                             broadleaf:
                               solr_url: "{$.props.zoo-hosts.solr-zoo-nodes}"
@@ -423,11 +423,11 @@ application:
                           uri: "{$.warlist.wars[1]}"
                           path: "/"
                           context-attrs: {}
-                          context-nodes: []                                               
+                          context-nodes: [] 
                   - deploy-admin-war:
                       action: serviceCall
                       phase: deploy-admin-war
-                      precedingPhases: [ build-app, add-solr-support ]
+                      precedingPhases: [ deploy-war ]
                       parameters:
                         timeout: 800
                         service: app-manage
@@ -449,13 +449,13 @@ application:
                           app-hosts: "{$.props.app-output.app-hosts}"
                           app-port: "{$.props.app-output.app-port}"
                           lb-bucket: "http://roundrobin:80/"
-                  - await350seconds:
+                  - await200seconds:
                       action: wait
                       description: Sample step that waits for 6 minute.
                       phase: sync
                       precedingPhases: [lb-reconfigure-servers]
                       parameters:
-                        delay: 350   
+                        delay: 200   
               rebuild-app:
                 steps:
                   - get-env-props:
@@ -494,8 +494,8 @@ application:
                       parameters:
                           isSolo: true
                           roles: [ tomcat-node ]
-                          runList: [ "recipe[broadleaf::add-solr-support]" ]
-                          recipeUrl: "https://raw.github.com/loky9000/broadleaf-component/master/cookbooks.tar.gz"
+                          runList: [ "recipe[cookbook-qubell-broadleaf::add-solr-support]" ]
+                          recipeUrl: "https://raw.githubusercontent.com/loky9000/broadleaf-component/1023279230bbc03f950307a0339140ee93c0b2ff/cookbooks.tar.gz"
                           jattrs:
                             broadleaf:
                               solr_url: "{$.props.zoo-hosts.solr-zoo-nodes}"
@@ -513,7 +513,7 @@ application:
                   - deploy-war:
                       action: serviceCall
                       phase: deploy-war
-                      precedingPhases: [ build-app, add-solr-support ]
+                      precedingPhases: [ build-app, add-solr-support, reconfigure-tomcat ]
                       parameters:
                         timeout: 600
                         service: app-manage
@@ -522,7 +522,7 @@ application:
                           uri: "{$.warlist.wars[1]}"
                           path: "/"
                           context-attrs: {}
-                          context-nodes: []                                            
+                          context-nodes: [] 
                   - deploy-admin-war:
                       action: serviceCall
                       phase: deploy-admin-war
@@ -536,13 +536,13 @@ application:
                            path: "/admin"
                            context-attrs: {}
                            context-nodes: [] 
-                  - await350seconds:
+                  - await200seconds:
                       action: wait
                       description: Sample step that waits for 6 minute.
                       phase: sync
                       precedingPhases: [deploy-admin-war]
                       parameters:
-                        delay: 350   
+                        delay: 200   
               destroy:
                 steps: []
 
