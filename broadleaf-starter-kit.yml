@@ -243,9 +243,9 @@ application:
                           isSolo: true
                           roles: [ tomcat-node ]
                           runList: [ "recipe[cookbook-qubell-broadleaf::add-solr-support]" ]
-                          recipeUrl: "https://raw.githubusercontent.com/loky9000/broadleaf-component/1023279230bbc03f950307a0339140ee93c0b2ff/cookbooks.tar.gz"
+                          recipeUrl: "https://s3.amazonaws.com/qubell-broadleaf-artifacts/loky9000/broadleaf-starter-kit-cookbooks-stable-4d15de9.tar.gz"
                           jattrs:
-                            broadleaf:
+                            cookbook-qubell-broadleaf:
                               solr_url: "{$.props.zoo-hosts.solr-zoo-nodes}"
                               solr_reindex_url: "{$.props.zoo-hosts.solr-zoo-nodes}"
                   - deploy-libs:
@@ -386,9 +386,9 @@ application:
                           isSolo: true
                           roles: [ tomcat-node ]
                           runList: [ "recipe[cookbook-qubell-broadleaf::add-solr-support]" ]
-                          recipeUrl: "https://raw.githubusercontent.com/loky9000/broadleaf-component/1023279230bbc03f950307a0339140ee93c0b2ff/cookbooks.tar.gz"
+                          recipeUrl: "https://s3.amazonaws.com/qubell-broadleaf-artifacts/loky9000/broadleaf-starter-kit-cookbooks-stable-4d15de9.tar.gz"
                           jattrs:
-                            broadleaf:
+                            cookbook-qubell-broadleaf:
                               solr_url: "{$.props.zoo-hosts.solr-zoo-nodes}"
                               solr_reindex_url: "{$.props.zoo-hosts.solr-zoo-nodes}"
                   - deploy-libs:
@@ -495,9 +495,9 @@ application:
                           isSolo: true
                           roles: [ tomcat-node ]
                           runList: [ "recipe[cookbook-qubell-broadleaf::add-solr-support]" ]
-                          recipeUrl: "https://raw.githubusercontent.com/loky9000/broadleaf-component/1023279230bbc03f950307a0339140ee93c0b2ff/cookbooks.tar.gz"
+                          recipeUrl: "https://s3.amazonaws.com/qubell-broadleaf-artifacts/loky9000/broadleaf-starter-kit-cookbooks-stable-4d15de9.tar.gz" 
                           jattrs:
-                            broadleaf:
+                            cookbook-qubell-broadleaf:
                               solr_url: "{$.props.zoo-hosts.solr-zoo-nodes}"
                               solr_reindex_url: "{$.props.zoo-hosts.solr-zoo-nodes}"
                   - reconfigure-tomcat:
