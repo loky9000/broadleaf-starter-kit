@@ -76,8 +76,8 @@ class ComponentTestCase(BaseComponentTestCase):
     
     @instance(byApplication=name)
     def test_solr_search(self, instance):
-        host = instance.returnValues['endpoints.solr-url'][0]
-        resp = requests.get(host + "/select/?q=*:*", verify=False)
-
-        assert resp.status_code == 200
+        hosts = instance.returnValues['endpoints.solr-url']
+        for host in hosts:
+           resp = requests.get(host, verify=False)
+           assert resp.status_code == 200
 
