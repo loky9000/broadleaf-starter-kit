@@ -5,8 +5,8 @@ application:
     input.app-fork: loky9000
     input.app-branch: solr-cloud # solr-green
     input.app-quantity: "1"
-    input.app-image: "us-east-1/ami-967edcff"
-    input.app-identity: "ubuntu"
+    input.app-image: "us-east-1/ami-1ba18d72"
+    input.app-identity: "ec2-user"
     input.instance-size: "m1.small"
     input.solr-collections: ["https://raw.githubusercontent.com/loky9000/DemoSite/solr-cloud/core/src/main/resources/cores/cores.tar.gz"]
     input.solr-version: "4.4.0"
