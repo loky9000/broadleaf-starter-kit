@@ -1,7 +1,7 @@
 broadleaf-component
 ===================
 
-[![Install](https://raw.github.com/qubell-bazaar/component-skeleton/master/img/install.png)](https://staging.dev.qubell.com/applications/upload?metadataUrl=https://github.com/loky9000/broadleaf-starter-kit/raw/master/meta.yml)
+[![Install](https://raw.github.com/qubell-bazaar/component-skeleton/master/img/install.png)](https://staging.dev.qubell.com/applications/upload?metadataUrl=https://github.com/qubell-bazaar/broadleaf-starter-kit/raw/master/meta.yml)
 
 broadleaf-component
 
@@ -23,15 +23,15 @@ Features
     
 Configurations
 --------------
-[![Build Status](https://travis-ci.org/loky9000/broadleaf-starter-kit.png?branch=staging)](https://travis-ci.org/loky9000/broadleaf-starter-kit)
+[![Build Status](https://travis-ci.org/qubell-bazaar/broadleaf-starter-kit.png?branch=staging)](https://travis-ci.org/qubell-bazaar/broadleaf-starter-kit)
 
-  Amazon Linux (us-east-1/ami-1ba18d72), AWS EC2 m1.small, ec2-user
-  CentOS 6.4 (us-east-1/ami-eb6b0182), AWS EC2 m1.small, root
-  Ubuntu 12.04 (us-east-1/ami-d0f89fb9), AWS EC2 m1.small, ubuntu
-  Ubuntu 10.04 (us-east-1/ami-0fac7566), AWS EC2 m1.small, ubuntu
+ - Broadleaf 3.1.0 , Amazon Linux (us-east-1/ami-1ba18d72), AWS EC2 m1.small, ec2-user
+ - Broadleaf 3.1.0 , CentOS 6.4 (us-east-1/ami-bf5021d6), AWS EC2 m1.small, root
+ - Broadleaf 3.1.0 , Ubuntu 12.04 (us-east-1/ami-967edcff), AWS EC2 m1.small, ubuntu
+ - Broadleaf 3.1.0 , Ubuntu 10.04 (us-east-1/ami-9f3906f6), AWS EC2 m1.small, ubuntu
 
     
-- [Tomcat 6](https://github.com/qubell-bazaar/component-tomcat-dev), [MySQL 5](https://github.com/qubell-bazaar/component-mysql-dev), [HAProxy 1.4](https://github.com/qubell-bazaar/component-haproxy) [Solr 4.4](https://github.com/loky9000/component-solr-dev)
+- [Tomcat 6](https://github.com/qubell-bazaar/component-tomcat-dev), [MySQL 5](https://github.com/qubell-bazaar/component-mysql-dev), [HAProxy 1.4](https://github.com/qubell-bazaar/component-haproxy) [Solr 4.4](https://github.com/qubell-bazaar/component-solr-dev)
     
 Pre-requisites
 --------------
