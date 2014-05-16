@@ -17,16 +17,27 @@ from qubell.api.private.testing import instance, environment, workflow, values
             "parameter": "vmIdentity",
             "value": "ubuntu"
         }]
-  }
+  },
+    "AmazonEC2_Ubuntu_1004": {
+        "policies": [{
+            "action": "provisionVms",
+            "parameter": "imageId",
+            "value": "us-east-1/ami-0fac7566"
+        }, {
+            "action": "provisionVms",
+            "parameter": "vmIdentity",
+            "value": "ubuntu"
+        }]
+    }
 })
 class ComponentTestCase(BaseComponentTestCase):
-    name = "broadleaf-component"
+    name = "broadleaf-starter-kit"
     apps = [{
         "name": name,
         "file": os.path.realpath(os.path.join(os.path.dirname(__file__), '../%s.yml' % name))
     }, {
         "name": "Database",
-        "url": "https://raw.githubusercontent.com/loky9000/component-mysql-dev/master/mysql-component-new.yaml",
+        "url": "https://raw.github.com/qubell-bazaar/component-mysql-dev/master/component-mysql-dev.yml",
         "launch": False
     }, {
         "name": "Load Balancer",
@@ -34,15 +45,15 @@ class ComponentTestCase(BaseComponentTestCase):
         "launch": False
     }, {
         "name": "Application Server",
-        "url": "https://raw.githubusercontent.com/loky9000/tomcat-component/master/component-tomcat.yml",
+        "url": "https://raw.github.com/qubell-bazaar/component-tomcat-dev/master/component-tomcat-dev.yml", 
         "launch": False
     }, {
-        "name": "Solr Search",
-        "url": "https://raw.githubusercontent.com/loky9000/solr/master/component-solr-zoo.yml",
+        "name": "Solr Cloud",
+        "url": "https://raw.githubusercontent.com/loky9000/component-solr-dev/master/component-solr-dev.yml",
         "launch": False
     }, { 
-        "name": "component-zookeeper",
-        "url": "https://raw.githubusercontent.com/loky9000/zookeeper/master/component-zookeeper-dev.yml",
+        "name": "Zookeeper",
+        "url": "https://raw.githubusercontent.com/loky9000/component-zookeeper-dev/master/component-zookeeper-dev.yml",
         "launch": False
    }]
 
@@ -65,8 +76,8 @@ class ComponentTestCase(BaseComponentTestCase):
     
     @instance(byApplication=name)
     def test_solr_search(self, instance):
-        host = instance.returnValues['endpoints.solr-url'][0]
-        resp = requests.get(host + "/select/?q=*:*", verify=False)
-
-        assert resp.status_code == 200
+         hosts = instance.returnValues['endpoints.solr-url']
+         for host in hosts:
+         resp = requests.get(host + "/select/?q=*:*", verify=False)
+         assert resp.status_code == 200
 
