@@ -23,7 +23,7 @@ Features
     
 Configurations
 --------------
-[![Build Status](https://travis-ci.org/qubell-bazaar/broadleaf-starter-kit.png?branch=staging)](https://travis-ci.org/qubell-bazaar/broadleaf-starter-kit)
+[![Build Status](https://travis-ci.org/qubell-bazaar/broadleaf-starter-kit.png?branch=master)](https://travis-ci.org/qubell-bazaar/broadleaf-starter-kit)
 
  - Broadleaf 3.1.0 , Amazon Linux (us-east-1/ami-1ba18d72), AWS EC2 m1.small, ec2-user
  - Broadleaf 3.1.0 , CentOS 6.4 (us-east-1/ami-bf5021d6), AWS EC2 m1.small, root
