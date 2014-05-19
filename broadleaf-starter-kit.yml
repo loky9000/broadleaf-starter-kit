@@ -8,10 +8,11 @@ application:
     input.app-image: "us-east-1/ami-1ba18d72"
     input.app-identity: "ec2-user"
     input.instance-size: "m1.small"
-    input.solr-collections: ["https://raw.githubusercontent.com/loky9000/DemoSite/solr-cloud/core/src/main/resources/cores/cores.tar.gz"]
+    input.solr-collections: ["https://raw.github.com/qubell-bazaar/DemoSite/solr-cloud/core/src/main/resources/cores/cores.tar.gz"]
     input.solr-version: "4.4.0"
     input.solr-quantity: "4"
     input.zookeeper-quantity: "3"
+    input.recipe-url: "https://s3.amazonaws.com/qubell-starter-kit-artifacts/qubell-bazaar/broadleaf-starter-kit-cookbooks-stable-f92dea1.tar.gz"
 
      
     
@@ -35,6 +36,7 @@ application:
       solr-version: "bind(solr#input.solr-version)" 
       solr-quantity: "bind(solr#input.solr-quantity)"
       zookeeper-quantity: "bind(solr#input.zookeeper-quantity)"
+      recipe-url: "bind(main.workflow#input.recipe-url)"
     endpoints:
       lb: "bind(lb#output.lb-stats)"
       app: "bind(app#output.app-hosts)"
@@ -74,6 +76,7 @@ application:
               solr-version: configuration(string)
               solr-quantity: configuration(string)
               zookeeper-quantity: configuration(string)
+              recipe-url: configuration(string)
             db-info:
               dbms: consume-signal(object)
               db-host: consume-signal(string)
@@ -123,6 +126,7 @@ application:
             input.solr-version: "4.4.0"
             input.solr-quantity: "3"
             input.zookeeper-quantity: "4"
+     #       input.recipe-url: "https://s3.amazonaws.com/qubell-starter-kit-artifacts/qubell-bazaar/broadleaf-starter-kit-cookbooks-stable-f92dea1.tar.gz"
 
             configuration.triggers:
               app-output.app-hosts: app-scale
@@ -247,7 +251,7 @@ application:
                           isSolo: true
                           roles: [ tomcat-node ]
                           runList: [ "recipe[cookbook-qubell-broadleaf::add-solr-support]" ]
-                          recipeUrl: "https://s3.amazonaws.com/qubell-starter-kit-artifacts/qubell-bazaar/broadleaf-starter-kit-cookbooks-stable-e4c3d34.tar.gz"
+                          recipeUrl: "{$.recipe-url}"
                           jattrs:
                             cookbook-qubell-broadleaf:
                               solr_url: "{$.props.zoo-hosts.solr-zoo-nodes}"
@@ -390,7 +394,7 @@ application:
                           isSolo: true
                           roles: [ tomcat-node ]
                           runList: [ "recipe[cookbook-qubell-broadleaf::add-solr-support]" ]
-                          recipeUrl: "https://s3.amazonaws.com/qubell-starter-kit-artifacts/qubell-bazaar/broadleaf-starter-kit-cookbooks-stable-e4c3d34.tar.gz"
+                          recipeUrl: "{$.recipe-url}"
                           jattrs:
                             cookbook-qubell-broadleaf:
                               solr_url: "{$.props.zoo-hosts.solr-zoo-nodes}"
@@ -499,7 +503,7 @@ application:
                           isSolo: true
                           roles: [ tomcat-node ]
                           runList: [ "recipe[cookbook-qubell-broadleaf::add-solr-support]" ]
-                          recipeUrl: "https://s3.amazonaws.com/qubell-starter-kit-artifacts/qubell-bazaar/broadleaf-starter-kit-cookbooks-stable-e4c3d34.tar.gz" 
+                          recipeUrl: "{$.recipe-url}" 
                           jattrs:
                             cookbook-qubell-broadleaf:
                               solr_url: "{$.props.zoo-hosts.solr-zoo-nodes}"
