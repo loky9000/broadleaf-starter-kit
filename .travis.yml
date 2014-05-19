@@ -6,8 +6,8 @@ gemfile:
 env:
   global:
   - ARTIFACTS_AWS_REGION=us-east-1
-  - ARTIFACTS_S3_BUCKET=qubell-broadleaf-artifacts
-  - QUBELL_TENANT=https://staging.dev.qubell.com
+  - ARTIFACTS_S3_BUCKET=qubell-starter-kit-artifacts
+  - QUBELL_TENANT=https://express.qubell.com
   - PROVIDER_TYPE=aws-ec2
   - PROVIDER_REGION=us-east-1
   - secure: hXAV7eH4FsxupLwEBlIFOjE8uIBCa+HIH7ym27eAgjWE5YUjxpXMjjnBX1LkQMpJOT0/ibOcafPsry02IVJJHs1JgCc2BsqJoSLUwoJWcoUTvPBTk/uLVxx/YKNgSwnizeV+ZbPByCugfC4XT2eEegNSXcLzmX8/rowc4R3cj54=
