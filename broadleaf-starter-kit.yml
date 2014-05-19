@@ -247,7 +247,7 @@ application:
                           isSolo: true
                           roles: [ tomcat-node ]
                           runList: [ "recipe[cookbook-qubell-broadleaf::add-solr-support]" ]
-                          recipeUrl: "https://s3.amazonaws.com/qubell-starter-kit-artifacts/qubell-bazaar/broadleaf-starter-kit-cookbooks-stable-e4c3d34.tar.gz"
+                          recipeUrl: "https://s3.amazonaws.com/qubell-starter-kit-artifacts/qubell-bazaar/broadleaf-starter-kit-cookbooks-stable-f92dea1.tar.gz"
                           jattrs:
                             cookbook-qubell-broadleaf:
                               solr_url: "{$.props.zoo-hosts.solr-zoo-nodes}"
@@ -390,7 +390,7 @@ application:
                           isSolo: true
                           roles: [ tomcat-node ]
                           runList: [ "recipe[cookbook-qubell-broadleaf::add-solr-support]" ]
-                          recipeUrl: "https://s3.amazonaws.com/qubell-starter-kit-artifacts/qubell-bazaar/broadleaf-starter-kit-cookbooks-stable-e4c3d34.tar.gz"
+                          recipeUrl: "https://s3.amazonaws.com/qubell-starter-kit-artifacts/qubell-bazaar/broadleaf-starter-kit-cookbooks-stable-f92dea1.tar.gz"
                           jattrs:
                             cookbook-qubell-broadleaf:
                               solr_url: "{$.props.zoo-hosts.solr-zoo-nodes}"
@@ -499,7 +499,7 @@ application:
                           isSolo: true
                           roles: [ tomcat-node ]
                           runList: [ "recipe[cookbook-qubell-broadleaf::add-solr-support]" ]
-                          recipeUrl: "https://s3.amazonaws.com/qubell-starter-kit-artifacts/qubell-bazaar/broadleaf-starter-kit-cookbooks-stable-e4c3d34.tar.gz" 
+                          recipeUrl: "https://s3.amazonaws.com/qubell-starter-kit-artifacts/qubell-bazaar/broadleaf-starter-kit-cookbooks-stable-f92dea1.tar.gz" 
                           jattrs:
                             cookbook-qubell-broadleaf:
                               solr_url: "{$.props.zoo-hosts.solr-zoo-nodes}"
