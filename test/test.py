@@ -30,7 +30,7 @@ from qubell.api.private.testing import instance, environment, workflow, values
         }]
     }
 })
-class ComponentTestCase(BaseComponentTestCase):
+class BroadleafTestCase(BaseComponentTestCase):
     name = "broadleaf-starter-kit"
     apps = [{
         "name": name,
@@ -60,7 +60,7 @@ class ComponentTestCase(BaseComponentTestCase):
     @instance(byApplication=name)
     @values({"lb-host": "host"})
     def test_host(self, instance, host):
-        resp = requests.get("http://" + host, verify=False)
+	resp = requests.get("http://" + host, verify=False)
 
         assert resp.status_code == 200
 
@@ -77,7 +77,8 @@ class ComponentTestCase(BaseComponentTestCase):
     @instance(byApplication=name)
     def test_solr_search(self, instance):
          hosts = instance.returnValues['endpoints.solr-url']
+         
          for host in hosts:
-         resp = requests.get(host + "/select/?q=*:*", verify=False)
-         assert resp.status_code == 200
+	     resp = requests.get(host + "/select/?q=*:*", verify=False)
+             assert resp.status_code == 200
 
