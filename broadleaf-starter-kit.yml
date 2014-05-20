@@ -275,7 +275,7 @@ application:
                         service: app-manage
                         command: reconfigure
                         arguments:
-                          java-opts: "-Djava.awt.headless=true -Xmx700m -XX:+UseConcMarkSweepGC -Ddatabase.driver=com.mysql.jdbc.Driver -Ddatabase.url=jdbc:mysql://{$.props.db-info.db-host}:{$.props.db-info.db-port}/{$.db-name}?autoReconnect=true -Ddatabase.user={$.db-user} -Ddatabase.password={$.db-password}"
+                          java-opts: "-Djava.awt.headless=true -Xms128m -Xmx1024m -XX:PermSize=256m -XX:MaxPermSize=256m -XX:+UseConcMarkSweepGC -Ddatabase.driver=com.mysql.jdbc.Driver -Ddatabase.url=jdbc:mysql://{$.props.db-info.db-host}:{$.props.db-info.db-port}/{$.db-name}?autoReconnect=true -Ddatabase.user={$.db-user} -Ddatabase.password={$.db-password}"
                   - deploy-war:
                       action: serviceCall
                       phase: deploy-war
@@ -294,7 +294,7 @@ application:
                       phase: deploy-admin-war
                       precedingPhases: [ deploy-war ]
                       parameters:
-                        timeout: 600
+                        timeout: 800
                         service: app-manage
                         command: deploy-war
                         arguments: 
@@ -317,13 +317,6 @@ application:
                       output:
                         result-lb: result
                           #todo move lb-bucket to launch param 
-                  - await200seconds:
-                      action: wait
-                      description: Sample step that waits for 6 minute.
-                      phase: sync
-                      precedingPhases: [lb-add-server]
-                      parameters:
-                        delay: 200   
                 return:
                   entry-url:
                     value: "{$.result-lb.entry-url}"
@@ -418,7 +411,7 @@ application:
                         service: app-manage
                         command: reconfigure
                         arguments:
-                          java-opts: "-Djava.awt.headless=true -Xmx700m -XX:+UseConcMarkSweepGC -Ddatabase.driver=com.mysql.jdbc.Driver -Ddatabase.url=jdbc:mysql://{$.props.db-info.db-host}:{$.props.db-info.db-port}/{$.db-name}?autoReconnect=true -Ddatabase.user={$.db-user} -Ddatabase.password={$.db-password}"        
+                          java-opts: "-Djava.awt.headless=true -Xms128m -Xmx1024m -XX:PermSize=256m -XX:MaxPermSize=256m -XX:+UseConcMarkSweepGC -Ddatabase.driver=com.mysql.jdbc.Driver -Ddatabase.url=jdbc:mysql://{$.props.db-info.db-host}:{$.props.db-info.db-port}/{$.db-name}?autoReconnect=true -Ddatabase.user={$.db-user} -Ddatabase.password={$.db-password}"        
                   - deploy-war:
                       action: serviceCall
                       phase: deploy-war
@@ -457,13 +450,6 @@ application:
                           app-hosts: "{$.props.app-output.app-hosts}"
                           app-port: "{$.props.app-output.app-port}"
                           lb-bucket: "http://roundrobin:80/"
-                  - await200seconds:
-                      action: wait
-                      description: Sample step that waits for 6 minute.
-                      phase: sync
-                      precedingPhases: [lb-reconfigure-servers]
-                      parameters:
-                        delay: 200   
               rebuild-app:
                 steps:
                   - get-env-props:
@@ -517,7 +503,7 @@ application:
                         service: app-manage
                         command: reconfigure
                         arguments:
-                          java-opts:  "-Djava.awt.headless=true -Xmx700m -XX:+UseConcMarkSweepGC -Ddatabase.driver=com.mysql.jdbc.Driver -Ddatabase.url=jdbc:mysql://{$.props.db-info.db-host}:{$.props.db-info.db-port}/{$.db-name}?autoReconnect=true -Ddatabase.user={$.db-user} -Ddatabase.password={$.db-password}"       
+                          java-opts:  "-Djava.awt.headless=true -Xmx1024m -XX:+UseConcMarkSweepGC -Ddatabase.driver=com.mysql.jdbc.Driver -Ddatabase.url=jdbc:mysql://{$.props.db-info.db-host}:{$.props.db-info.db-port}/{$.db-name}?autoReconnect=true -Ddatabase.user={$.db-user} -Ddatabase.password={$.db-password}"       
                   - deploy-war:
                       action: serviceCall
                       phase: deploy-war
@@ -544,13 +530,6 @@ application:
                            path: "/admin"
                            context-attrs: {}
                            context-nodes: [] 
-                  - await200seconds:
-                      action: wait
-                      description: Sample step that waits for 6 minute.
-                      phase: sync
-                      precedingPhases: [deploy-admin-war]
-                      parameters:
-                        delay: 200   
               destroy:
                 steps: []
 
