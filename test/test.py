@@ -60,11 +60,11 @@ class BroadleafTestCase(BaseComponentTestCase):
         "launch": False
     }, {
         "name": "Solr Cloud",
-        "url": "https://raw.githubusercontent.com/loky9000/component-solr-dev/master/component-solr-dev.yml",
+        "url": "https://raw.github.com/qubell-bazaar/component-solr-dev/master/component-solr-dev.yml",
         "launch": False
     }, { 
         "name": "Zookeeper",
-        "url": "https://raw.githubusercontent.com/loky9000/component-zookeeper-dev/master/component-zookeeper-dev.yml",
+        "url": "https://raw.github.com/qubell-bazaar/component-zookeeper-dev/master/component-zookeeper-dev.yml",
         "launch": False
    }]
 
