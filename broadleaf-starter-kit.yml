@@ -111,7 +111,7 @@ application:
             input.db-user: broadleaf
             input.db-password: broadleaf #const
             input.privileges: ["all"] #const
-            input.db-sql-url: ["https://raw.github/qubell-bazaar/DemoSite/solr-cloud/core/src/main/resources/sql/schema.sql", "https://raw.github.com/qubell-bazaar/DemoSite/solr-cloud/core/src/main/resources/sql/load_full.sql"]
+            input.db-sql-url: ["https://raw.github.com/qubell-bazaar/DemoSite/solr-cloud/core/src/main/resources/sql/schema.sql", "https://raw.github.com/qubell-bazaar/DemoSite/solr-cloud/core/src/main/resources/sql/load_full.sql"]
             input.scm-provider: git #const
             input.lib-uri: ["http://repo1.maven.org/maven2/org/apache/tomcat/dbcp/6.0.26/dbcp-6.0.26.jar", "http://repo1.maven.org/maven2/mysql/mysql-connector-java/5.1.6/mysql-connector-java-5.1.6.jar"]
             input.create-context: false
@@ -408,10 +408,17 @@ application:
                         command: reconfigure
                         arguments:
                           java-opts: "-Djava.awt.headless=true -Xms128m -Xmx1024m -XX:PermSize=256m -XX:MaxPermSize=256m -XX:+UseConcMarkSweepGC -Ddatabase.driver=com.mysql.jdbc.Driver -Ddatabase.url=jdbc:mysql://{$.props.db-info.db-host}:{$.props.db-info.db-port}/{$.db-name}?autoReconnect=true -Ddatabase.user={$.db-user} -Ddatabase.password={$.db-password}"        
+                  - await 360seconds:
+                      action: wait
+                      description: Sample step that waits for 6 minute.
+                      phase: wait-after-reconfigure
+                      precedingPhases: [reconfigure-tomcat]
+                      parameters:
+                        delay: 360 
                   - deploy-war:
                       action: serviceCall
                       phase: deploy-war
-                      precedingPhases: [ build-app, add-solr-support, reconfigure-tomcat ]
+                      precedingPhases: [ build-app, wait-after-reconfigure ]
                       parameters:
                         timeout: 600
                         service: app-manage
@@ -490,20 +497,10 @@ application:
                             cookbook-qubell-broadleaf:
                               solr_url: "{$.props.zoo-hosts.solr-zoo-nodes}"
                               solr_reindex_url: "{$.props.zoo-hosts.solr-zoo-nodes}"
-                  - reconfigure-tomcat:
-                      action: serviceCall
-                      phase: reconfigure-tomcat
-                      precedingPhases: [ add-solr-support ]
-                      parameters:
-                        timeout: 800
-                        service: app-manage
-                        command: reconfigure
-                        arguments:
-                          java-opts:  "-Djava.awt.headless=true -Xmx1024m -XX:+UseConcMarkSweepGC -Ddatabase.driver=com.mysql.jdbc.Driver -Ddatabase.url=jdbc:mysql://{$.props.db-info.db-host}:{$.props.db-info.db-port}/{$.db-name}?autoReconnect=true -Ddatabase.user={$.db-user} -Ddatabase.password={$.db-password}"       
                   - deploy-war:
                       action: serviceCall
                       phase: deploy-war
-                      precedingPhases: [ build-app, add-solr-support, reconfigure-tomcat ]
+                      precedingPhases: [ add-solr-support ]
                       parameters:
                         timeout: 600
                         service: app-manage
