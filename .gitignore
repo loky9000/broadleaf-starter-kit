@@ -8,3 +8,5 @@
 *.pyc
 Berksfile.lock
 berks/
+.kitchen/
+*.bak
