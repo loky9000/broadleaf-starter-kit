@@ -37,6 +37,33 @@ Pre-requisites
  - Either installed Chef on target compute OR launch under root
  - All pre-requisites from the components above
 
-Example Usage
---------------
+<a name="how-does-it-work"></a>
+### How Does this Kit Work?
+
+Broadleaf Starter Kit has three main components:
+
+* **Broadleaf Demo site** - The Heat Clinic eCommerce store.
+* **Broadleaf admin panel** - The Administration Panel  for easy  Broadleaf catalog management.
+* **Solr Cloud Search Engine** - A search engine that indexes and executes search queries from Broadleaf catalog.
+   By default Broadleaf use embeded Solr support. But in our demo  we setup  a full Solr cluster - 4 nodes 2 shards with Zookeeper ensemble - 3 nodes.
+   We use our fork Broadleaf DemoSite [https://github.com/qubell-bazaar/DemoSite](https://github.com/qubell-bazaar/DemoSite).It contain:
+      -  preconfigured archive with solr collection files  
+      -  changed sources for support mysql and solr cloud
+
+<a name="setup"></a>
+## Setup
+You will need to set up the following in order to use Broadleaf Starter Kit:
+
+* A [Qubell Adaptive PaaS](http://qubell.com) account
+* An Amazon AWS account
+* Access to git repository with CRS sources *(optional)*
+
+Please refer to the steps below for getting set up.
+
+<a name="step-by-step-setup"></a>
+### Step-by-step Setup Guide
+- **[Step 1. Set up and Configure an Amazon Web Services (AWS) Account](docs/step-1-amazon-setup-guide.md)**
+- **[Step 2. Set up a Qubell Account](docs/step-2-qubell-setup-guide.md)**
+- **[Step 3. Obtain the Broadleaf Starter Kit](docs/step-3-get-starter-kit.md)**
+- **[Step 4. Launch the Application](docs/step-4-launch-guide.md)**
 
