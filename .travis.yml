@@ -21,11 +21,9 @@ install:
 - sudo apt-get -y -q install python-pip
 - sudo pip install -r test/requirements.txt
 before_script:
-- gem install --version 2.0.15 berkshelf --no-ri --no-rdoc
 - gem install --version 0.8.9 faraday --no-ri --no-rdoc
 - gem install travis-artifacts --no-ri --no-rdoc
-- gem install --version 3.1.0 ridley --no-ri --no-rdoc
-- gem install --version 0.3.2 varia_model --no-ri --no-rdoc
-- gem install --version 2.0.5 hashie --no-ri --no-rdoc
+- gem install --version 2.1.1 hashie --no-ri --no-rdoc
+- gem install --version 2.0.15 berkshelf --no-ri --no-rdoc
 - git submodule update --init --recursive
 script: ./build.sh
