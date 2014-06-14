@@ -1,6 +1,6 @@
 broadleaf-starter-kit
 ===================
-
+[![Build Status](http://jenkins.dev.qubell.com:8080/buildStatus/icon?job=broadleaf-starter-kit-test)](http://jenkins.dev.qubell.com:8080/job/broadleaf-starter-kit-test/)
 [![Install](https://raw.github.com/qubell-bazaar/component-skeleton/master/img/install.png)](https://express.qubell.com/applications/upload?metadataUrl=https://github.com/qubell-bazaar/broadleaf-starter-kit/raw/master/meta.yml)
 
 ![](http://www.broadleafcommerce.com/img/broadleaf_logo_white.png)
@@ -21,7 +21,6 @@ Features
     
 Configurations
 --------------
-[![Build Status](https://travis-ci.org/qubell-bazaar/broadleaf-starter-kit.png?branch=master)](https://travis-ci.org/qubell-bazaar/broadleaf-starter-kit)
 
  - Broadleaf 3.1.0 , Amazon Linux (us-east-1/ami-1ba18d72), AWS EC2 m1.small, ec2-user
  - Broadleaf 3.1.0 , CentOS 6.4 (us-east-1/ami-bf5021d6), AWS EC2 m1.small, root
