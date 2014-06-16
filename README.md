@@ -1,6 +1,7 @@
 broadleaf-starter-kit
 ===================
 [![Build Status](http://jenkins.dev.qubell.com:8080/buildStatus/icon?job=broadleaf-starter-kit-test)](http://jenkins.dev.qubell.com:8080/job/broadleaf-starter-kit-test/)
+
 [![Install](https://raw.github.com/qubell-bazaar/component-skeleton/master/img/install.png)](https://express.qubell.com/applications/upload?metadataUrl=https://github.com/qubell-bazaar/broadleaf-starter-kit/raw/master/meta.yml)
 
 ![](http://www.broadleafcommerce.com/img/broadleaf_logo_white.png)
