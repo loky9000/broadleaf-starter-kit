@@ -69,6 +69,7 @@ class BroadleafTestCase(BaseComponentTestCase):
     name = "broadleaf-starter-kit"
     apps = [{
         "name": name,
+        "settings": {"destroyInterval": 7200000},
         "file": os.path.realpath(os.path.join(os.path.dirname(__file__), '../%s.yml' % name))
     }, {
         "name": "Database",

@@ -8,7 +8,7 @@ broadleaf-starter-kit
 ![](http://tomcat.apache.org/images/tomcat-power.gif)
 ![](https://lucene.apache.org/images/solr.png)
 
-Is a example of  Broadleaf eCommerce applications with SolrCloud as a search engine   [Qubell Adaptive PaaS](http://qubell.com).
+This is example of  Broadleaf eCommerce applications with SolrCloud as a search engine   [Qubell Adaptive PaaS](http://qubell.com).
 
 Features
 --------
