@@ -44,7 +44,7 @@ class BaseComponentTestCase(BaseTestCase):
 
     @classmethod
     def timeout(cls):
-        return 60
+        return 120
 
     @classmethod
     def environment(cls, organization):
