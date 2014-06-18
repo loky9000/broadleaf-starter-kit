@@ -4,6 +4,8 @@ REPO_NAME=$(echo ${TRAVIS_REPO_SLUG} | cut -d/ -f2)
 OWNER_NAME=$(echo ${TRAVIS_REPO_SLUG} | cut -d/ -f1)
 GIT_REVISION=$(git log --pretty=format:'%h' -n 1)
 LAST_COMMIT_AUTHOR=$(git log --pretty=format:'%an' -n1)
+GIT_MESSAGE=$(git log --format=%B -n 1|tail -c 11)
+BRANCH_NAME=$(echo $BRANCH|sed -e 's/origin\///g')
 
 function check {
     "$@"
@@ -61,9 +63,11 @@ function publish_github {
     rm -rf *.tar.gz
     git commit -a -m "CI: Success build ${TRAVIS_BUILD_NUMBER} [ci skip]"
     git checkout -b build
-    git push -q origin build:${TRAVIS_BRANCH}
+    git push -q origin build:${BRANCH_NAME}
 }
-
+if [[${GIT_MESSAGE} == "[ci skip]"]]; then
+        exit 0
+fi
 if [[ ${LAST_COMMIT_AUTHOR} != "CI" ]]; then
         publish "stable-${GIT_REVISION}"
         replace "stable-${GIT_REVISION}"
@@ -79,3 +83,4 @@ if [[ ${LAST_COMMIT_AUTHOR} != "CI" ]]; then
   fi
 
 fi
+
