@@ -12,7 +12,7 @@ application:
     input.solr-version: "4.4.0"
     input.solr-quantity: "4"
     input.zookeeper-quantity: "3"
-    input.recipe-url: "https://s3.amazonaws.com/qubell-starter-kit-artifacts/qubell-bazaar/broadleaf-starter-kit-cookbooks-stable-818766f.tar.gz"
+    input.recipe-url: "https://s3.amazonaws.com/qubell-starter-kit-artifacts/qubell-bazaar/broadleaf-starter-kit-cookbooks-stable-f96831f.tar.gz"
 
   bindings:
     - [main.workflow, db]
