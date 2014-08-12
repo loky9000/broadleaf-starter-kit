@@ -127,7 +127,7 @@ class BroadleafTestCase(BaseComponentTestCase):
         assert len(instance.returnValues['endpoints.app']) == 1
         params = {'input.app-quantity': '2'}
         instance.reconfigure(parameters=params)
-        assert instance.ready(timeout=20)
+        assert instance.ready(timeout=45)
 
         check_site(instance)
         # Check we have 2 hosts up
