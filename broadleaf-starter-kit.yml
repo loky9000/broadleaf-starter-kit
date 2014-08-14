@@ -13,7 +13,7 @@ application:
     input.instance-size: "m1.small" # EC2 Instance type 
     input.solr-collections: ["https://raw.github.com/qubell-bazaar/DemoSite/solr-cloud/core/src/main/resources/cores/cores.tar.gz"] # Archive with cores for  "Solr Cloud" component
     input.solr-version: "4.4.0" # Solr Version
-    input.recipe-url: "https://s3.amazonaws.com/qubell-starter-kit-artifacts/qubell-bazaar/broadleaf-starter-kit-cookbooks-stable-48affa5.tar.gz" # Chef Cookbooks Url
+    input.recipe-url: "https://s3.amazonaws.com/qubell-starter-kit-artifacts/qubell-bazaar/broadleaf-starter-kit-cookbooks-stable-88fb666.tar.gz" # Chef Cookbooks Url
 
 # Binding section.
 # Here we are bind main.workflow component on sumbmodules.
