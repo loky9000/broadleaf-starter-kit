@@ -1,8 +1,8 @@
 kit:
-  name: "Broadleaf"
+  name: "Broadleaf Starter Kit"
   link: https://github.com/qubell-bazaar/broadleaf-starter-kit
   applications:
-    - name: "Broadlea0f"
+    - name: "Broadleaf"
       manifest: https://raw.github.com/qubell-bazaar/broadleaf-starter-kit/master/broadleaf-starter-kit.yml
     - name: "Database"
       manifest: https://raw.github.com/qubell-bazaar/component-mysql-dev/0.3.0/component-mysql-dev.yml
