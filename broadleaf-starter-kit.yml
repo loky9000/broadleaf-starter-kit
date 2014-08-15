@@ -4,19 +4,19 @@ application:
 # In this section you can set input configuration parameters which you
 # will be able to change later in reconfiguration
   configuration:
-    input.db-name: broadleaf # Name for db created in your "Datatbase" component
+    input.db-name: broadleaf # Name for db created in your "Database" component
     input.lb-bucket: http://roundrobin:80 # Name for bucket created in your "Load Balancer" component
     input.app-fork: qubell-bazaar # Broadleaf DemoSite Fork name
     input.app-branch: solr-cloud # solr-green (Branch name in your fork)
     input.app-quantity: 1 # Numbers of hosts with application for "Application Server" Component
     input.operating-system: {image: "us-east-1/ami-1ba18d72", identity: ec2-user} # image/identity pair for describing Operating system.
     input.instance-size: "m1.small" # EC2 Instance type 
-    input.solr-collections: ["https://raw.github.com/qubell-bazaar/DemoSite/solr-cloud/core/src/main/resources/cores/cores.tar.gz"] # Archive with cores for  "Solr Cloud" component
+    input.solr-collections: ["https://raw.github.com/qubell-bazaar/DemoSite/solr-cloud/core/src/main/resources/cores/cores.tar.gz"] # Archive with cores for "Solr Cloud" component
     input.solr-version: "4.4.0" # Solr Version
     input.recipe-url: "https://s3.amazonaws.com/qubell-starter-kit-artifacts/qubell-bazaar/broadleaf-starter-kit-cookbooks-stable-88fb666.tar.gz" # Chef Cookbooks Url
 
 # Binding section.
-# Here we are bind main.workflow component on sumbmodules.
+# Here we bind main.workflow component on submodules.
 # This is a component binding section it mean interfaces in components [main.workflow, app]
 # will be connected by pin names regardless of interface name
 
@@ -27,11 +27,11 @@ application:
     - [main.workflow, lb]
 
 # Application Interfaces binding section.
-#Here we describe a interfaces with pins  and their bindings on  component's  interfaces.
+# Here we describe a interfaces with pins and their bindings on component's interfaces.
 # For binding using function bind(Component1#interface.pin, Component2#interface.pin)
   interfaces:
     input: # Contain pins with type: configuration()
-      db-name: "bind(main.workflow#input.db-name)" # For example  value input.db-name mapped on input.db-name in component main.workflow
+      db-name: "bind(main.workflow#input.db-name)" # For example value input.db-name mapped on input.db-name in component main.workflow
       app-fork: "bind(main.workflow#input.app-fork)"
       app-branch: "bind(main.workflow#input.app-branch)"
       lb-bucket: "bind(main.workflow#input.lb-bucket)"
@@ -56,18 +56,18 @@ application:
     main:  # We have a root component called "main"
       components:
         workflow: # Component main contain component main.workflow
-          type: workflow.Instance #It's a  component type  to run imperative workflow
+          type: workflow.Instance #It's a component type to run imperative workflow
           interfaces: # Each component have interfaces wit pins
             input: # Contain pins with type: configuration().This type using for configuration parameters
               operating-system:
-                 type: configuration(map<string,object>) # It's a pin with  configuration type and value will be a map string on left side  object on right side
+                 type: configuration(map<string,object>) # It's a pin with configuration type and value will be a map string on left side object on right side
                  suggestions:
                      "centos": {image: "us-east-1/ami-bf5021d6", identity: root} # Here string "centos" mapped on object {image: "us-east-1/ami-bf5021d6", identity: root} etc.
                      "amazon": {image: "us-east-1/ami-1ba18d72", identity: ec2-user}
                      "ubuntu1204": {image: "us-east-1/ami-967edcff", identity: ubuntu}
                      "ubuntu1004": {image: "us-east-1/ami-9f3906f6", identity: ubuntu}
               db-name:
-                 type: configuration(string) # It's a pin with  configuration type and value will be a string
+                 type: configuration(string) # It's a pin with configuration type and value will be a string
                  name: Mysql database name 
               scm-provider:
                  type: configuration(string)
@@ -96,24 +96,12 @@ application:
               lib-uri:
                  type: configuration(list<string>)
                  name: Lib Url
-              lbstats-stats-user:
-                 type: configuration(string)
-                 name: Haproxy Statistics page User
-              lbstats-stats-pass:
-                 type: configuration(string)
-                 name: Haproxy Statistics page User Password
-              lbstats-stats-port:
-                 type: configuration(string)
-                 name: Haproxy Statistics page port
-              lbstats-stats-url:
-                 type: configuration(string)
-                 name: Haproxy Statistics page Url
               recipe-url:
                  type: configuration(string)
                  name: Chef Cookbooks Url
-            mysql: # Signals which we are send/recieve to Database submodule
+            mysql: # Signals which we send/receive to Database submodule
               dbms:
-                 type: consume-signal(object)  # This type mean we recieve signal which value will be a object on that pin
+                 type: consume-signal(object)  # This type mean we receive signal which value will be a object on that pin
                  name: Database parameters
               db-host:
                  name: Database host 
@@ -121,7 +109,7 @@ application:
               db-port:
                  type: consume-signal(int)
                  name: Database port
-              schema:  # send-command type used for ServiceClall actions in steps below. It contain list of parameters and their types
+              schema:  # send-command type used for ServiceCall actions in steps below. It contain list of parameters and their types
                  type: send-command(string db-user, string db-user-password, list<string> db-user-privileges => object connection) # 
               db:
                  type: send-command(string db-name, string db-action)
@@ -132,7 +120,7 @@ application:
               file-query:
                  type: send-command(object connection, list<string> sql-url)
                  name: Run sql query
-            solr-zoo: # Signals which we are send/recieve  to Solr  submodule
+            solr-zoo: # Signals which we send/receive to Solr submodule
               solr-url:
                  type: consume-signal(list<string>)
                  name: Solr urls list
@@ -142,7 +130,7 @@ application:
               zoo-ui:
                  type: consume-signal(list<string>)
                  name: Zookeeper UI url
-            tomcat: # Signals which we are send/recieve to Application Server  submodule
+            tomcat: # Signals which we send/receive to Application Server submodule
               build-app:
                  type: send-command(string scm-provider, string git-uri, string app-branch => list<string> wars )
                  name: Maven Build Tomcat action
@@ -164,14 +152,14 @@ application:
               app-port:
                  type: consume-signal(int)
                  name: Application port
-            haproxy: # Signals which we are send/recieve to Load Balancer submodule
+            haproxy: # Signals which send/receive to Load Balancer submodule
               add-servers:
                  type: send-command(list<string> app-hosts, int app-port, string lb-bucket => string entry-url)
               reconfigure-servers:
                  type: send-command(list<string> app-hosts, int app-port, string lb-bucket)
               lb-stats:
                  type: consume-signal(object)
-            result: # Signals which we are publish on App dashboard
+            result: # Signals which we publish on App dashboard
               entry-url:
                  type: publish-signal(string)
                  name: Broadleaf DemoSite
@@ -179,7 +167,7 @@ application:
                  type: publish-signal(string)
                  name: Broadleaf Admin Panel
 
-          required: [mysql, tomcat, haproxy , solr-zoo] # We  don't continue without signals on required interfaces. In this case we are waiting  tomcat,mysql and solr+zookeeper hosts return values
+          required: [mysql, tomcat, haproxy , solr-zoo] # We don't continue without signals on required interfaces. In this case we are waiting tomcat, mysql and solr+zookeeper hosts return values
            # Static constants #
           configuration:  
             input.db-user: broadleaf
@@ -188,16 +176,12 @@ application:
             input.db-sql-url: ["https://raw.github.com/qubell-bazaar/DemoSite/solr-cloud/core/src/main/resources/sql/schema.sql", "https://raw.github.com/qubell-bazaar/DemoSite/solr-cloud/core/src/main/resources/sql/load_full.sql"]
             input.scm-provider: git #const
             input.lib-uri: ["http://repo1.maven.org/maven2/org/apache/tomcat/dbcp/6.0.26/dbcp-6.0.26.jar", "http://repo1.maven.org/maven2/mysql/mysql-connector-java/5.1.6/mysql-connector-java-5.1.6.jar"]
-            input.lbstats-stats-user: admin
-            input.lbstats-stats-pass: pa55w0rd
-            input.lbstats-stats-port: "1926"
-            input.lbstats-stats-url: "/admin?stats"
             
             configuration.triggers: # Trigger call corresponded workflow when values changed
               tomcat.app-hosts: app-scale
               input.app-fork: rebuild-app
               input.app-branch: rebuild-app
-            configuration.propagateStatus: [ app-scale, rebuild-app ] # Changing App state on "Executing" when app-scale or rebuild-app workflows  running
+            configuration.propagateStatus: [ app-scale, rebuild-app ] # Change application state to "Executing" when relevant workflows are running 
             configuration.workflows:
               launch:
                 steps:
@@ -316,7 +300,7 @@ application:
                           path: "/"
                           context-attrs: {}
                           context-nodes: []
-                  - deploy-admin-war: # Deploing Admin Panel war and waitng  200
+                  - deploy-admin-war: # Deploing Admin Panel war and waitng 200
                       action: serviceCall
                       phase: deploy-admin-war
                       precedingPhases: [ deploy-war ]
@@ -473,7 +457,7 @@ application:
                           app-hosts: "{$.props.tomcat.app-hosts}"
                           app-port: "{$.props.tomcat.app-port}"
                           lb-bucket: "http://roundrobin:80/"
-              rebuild-app: # Additional workflow for rebuilding artifacts in case changing git  fork or branch
+              rebuild-app: # Additional workflow for rebuilding artifacts in case changing git fork or branch
                 steps:
                   - get-env-props:
                       action: getEnvironmentProperties
@@ -607,7 +591,7 @@ application:
         tomcat:
           build-app:
               type: receive-command(string scm-provider, string git-uri, string app-branch => list<string> wars)
-              name: Mave Build
+              name: Maven Build
           deploy-libs:
               type: receive-command(list<string> lib-uri)
               name: Deploy Libs
@@ -632,19 +616,6 @@ application:
       configuration:
         __locator.application-id: "Load Balancer"
       interfaces:
-        input:
-          stats-user:
-              type: configuration(string)
-              name: Haproxy Statistics page User
-          stats-pass:
-              type: configuration(string)
-              name: Haproxy Statistics page User Password
-          stats-port:
-              type: configuration(int)
-              name: Haproxy Statistics page port
-          stats-url:
-              type: configuration(string)
-              name: Haproxy Statistics page Url
         haproxy:
           add-servers:
               type: receive-command(list<string> app-hosts, int app-port, string lb-bucket => string entry-url)
