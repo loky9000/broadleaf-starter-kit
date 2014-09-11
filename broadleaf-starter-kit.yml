@@ -245,6 +245,7 @@ application:
                       phase: build-app
                       precedingPhases: [ get-env-props ]
                       parameters:
+                        retryCount: 3
                         timeout: 600
                         service: tomcat
                         command: build-app
@@ -370,6 +371,7 @@ application:
                       phase: build-app
                       precedingPhases: [ get-env-props ]
                       parameters:
+                        retryCount: 3
                         timeout: 1000
                         service: tomcat
                         command: build-app
@@ -479,6 +481,7 @@ application:
                       phase: build-app
                       precedingPhases: [ get-env-props ]
                       parameters:
+                        retryCount: 3
                         timeout: 800
                         service: tomcat
                         command: build-app
