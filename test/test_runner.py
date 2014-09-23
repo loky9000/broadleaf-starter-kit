@@ -43,10 +43,6 @@ class BaseComponentTestCase(BaseTestCase):
     apps = []
 
     @classmethod
-    def timeout(cls):
-        return 120
-
-    @classmethod
     def environment(cls, organization):
         base_env = super(BaseComponentTestCase, cls).environment(organization)
 

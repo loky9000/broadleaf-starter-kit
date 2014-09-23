@@ -5,8 +5,8 @@ from qubell.api.private.testing import environment, instance, values
 from qubell.api.tools import retry
 from testtools import skip
 
-
 from test_runner import BaseComponentTestCase
+
 
 def eventually(*exceptions):
     """
@@ -67,31 +67,16 @@ def check_site(instance):
 })
 class BroadleafTestCase(BaseComponentTestCase):
     name = "broadleaf-starter-kit"
+    meta = "https://raw.githubusercontent.com/qubell-bazaar/broadleaf-starter-kit/master/meta.yml"  
     apps = [{
         "name": name,
-        "settings": {"destroyInterval": 7200000},
+        "settings": {"destroyInterval": 14400000},
         "file": os.path.realpath(os.path.join(os.path.dirname(__file__), '../%s.yml' % name))
-    }, {
-        "name": "Database",
-        "url": "https://raw.github.com/qubell-bazaar/component-mysql-dev/master/component-mysql-dev.yml",
-        "launch": False
-    }, {
-        "name": "Load Balancer",
-        "url": "https://raw.github.com/qubell-bazaar/component-haproxy/master/component-haproxy.yml",
-        "launch": False
-    }, {
-        "name": "Application Server",
-        "url": "https://raw.github.com/qubell-bazaar/component-tomcat-dev/master/component-tomcat-dev.yml", 
-        "launch": False
-    }, {
-        "name": "Solr Cloud",
-        "url": "https://raw.github.com/qubell-bazaar/component-solr-dev/master/component-solr-dev.yml",
-        "launch": False
-    }, { 
-        "name": "Zookeeper",
-        "url": "https://raw.github.com/qubell-bazaar/component-zookeeper-dev/master/component-zookeeper-dev.yml",
-        "launch": False
    }]
+
+    @classmethod
+    def timeout(cls):
+        return 240
 
     @instance(byApplication=name)
     @values({"lb-host": "host"})
