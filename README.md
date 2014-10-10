@@ -1,5 +1,9 @@
 broadleaf-starter-kit
 ===================
+
+Version 1.0-31p
+---------------
+
 [![Install](https://raw.github.com/qubell-bazaar/component-skeleton/master/img/install.png)](https://express.qubell.com/applications/upload?metadataUrl=https://github.com/qubell-bazaar/broadleaf-starter-kit/raw/1.0-31p/meta.yml)
 
 ![](http://www.broadleafcommerce.com/img/broadleaf_logo_white.png)
