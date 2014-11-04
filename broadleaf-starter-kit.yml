@@ -21,10 +21,10 @@ application:
 # will be connected by pin names regardless of interface name
 
   bindings:
-    - [main.workflow, db]
-    - [main.workflow, solr]
-    - [main.workflow, app]
-    - [main.workflow, lb]
+    - [main.workflow, Database]
+    - [main.workflow, Solr]
+    - [main.workflow, AppServer]
+    - [main.workflow, LoadBalancer]
 
 # Application Interfaces binding section.
 # Here we describe a interfaces with pins and their bindings on component's interfaces.
@@ -35,32 +35,48 @@ application:
       app-fork: "bind(main.workflow#input.app-fork)"
       app-branch: "bind(main.workflow#input.app-branch)"
       lb-bucket: "bind(main.workflow#input.lb-bucket)"
-      app-quantity: "bind(app#input.quantity)"
-      operating-system: "bind(main.workflow#input.operating-system, app#input.operating-system)"
-      instance-size: "bind(app#input.instance-size)"
-      solr-collections: "bind(solr#input.solr-collections)"
-      solr-version: "bind(solr#input.solr-version)"
+      app-quantity: "bind(AppServer#input.quantity)"
+      operating-system: "bind(main.workflow#input.operating-system, AppServer#input.operating-system)"
+      instance-size: "bind(AppServer#input.instance-size)"
+      solr-collections: "bind(Solr#input.solr-collections)"
+      solr-version: "bind(Solr#input.solr-version)"
       recipe-url: "bind(main.workflow#input.recipe-url)"
+    app-meta:
+      application-pic: "bind(metadata#output.application-pic)"
     endpoints:  # That values we want to see on main application dashboard
-      lb: "bind(lb#haproxy.lb-stats)"
-      app: "bind(app#tomcat.app-hosts)"
-      db: "bind(db#mysql.dbms)"
+      lb: "bind(LoadBalancer#haproxy.lb-stats)"
+      app: "bind(AppServer#tomcat.app-hosts)"
+      db: "bind(Database#mysql.dbms)"
       demosite: "bind(main.workflow#result.entry-url)"
       admin-url: "bind(main.workflow#result.entry-admin-url)"
-      solr-url: "bind(solr#solr-zoo.solr-url)"
-      zoo-ui: "bind(solr#solr-zoo.zoo-ui)"
+      solr-url: "bind(Solr#solr-zoo.solr-url)"
+      zoo-ui: "bind(Solr#solr-zoo.zoo-ui)"
 
 ## Components definitions ##
 
   components:
+    metadata:
+      type: cobalt.common.Constants
+      interfaces:
+        output:
+          application-pic:
+            type: publish-signal(map<string, object>)
+            name: ""
+      configuration:
+        configuration.values:
+          output.application-pic:
+            large: "https://s3.amazonaws.com/qubell-images/broadleaf.png"
+            small: "https://s3.amazonaws.com/qubell-images/broadleaf.png"
+            small-height: 100
     main:  # We have a root component called "main"
       components:
         workflow: # Component main contain component main.workflow
-          type: workflow.Instance #It's a component type to run imperative workflow
+          type: workflow.Instance # It's a component type to run imperative workflow
           interfaces: # Each component have interfaces wit pins
             input: # Contain pins with type: configuration().This type using for configuration parameters
               operating-system:
                  type: configuration(map<string,object>) # It's a pin with configuration type and value will be a map string on left side object on right side
+                 name: Operating System
                  suggestions:
                      "centos": {image: "us-east-1/ami-bf5021d6", identity: root} # Here string "centos" mapped on object {image: "us-east-1/ami-bf5021d6", identity: root} etc.
                      "amazon": {image: "us-east-1/ami-1ba18d72", identity: ec2-user}
@@ -68,19 +84,19 @@ application:
                      "ubuntu1004": {image: "us-east-1/ami-9f3906f6", identity: ubuntu}
               db-name:
                  type: configuration(string) # It's a pin with configuration type and value will be a string
-                 name: Mysql database name 
+                 name: MySQL database name 
               scm-provider:
                  type: configuration(string)
-                 name: SCM provider(Git,SVN etc)
+                 name: SCM provider (Git, Subversion etc)
               app-fork:
                  type: configuration(string)
-                 name: Github repo fork
+                 name: Git fork
               app-branch:
                  type: configuration(string)
-                 name: Github repo branch
+                 name: Git branch
               lb-bucket:
                  type: configuration(string)
-                 name: Haproxy LB frontend  type and port
+                 name: LoadBalancer bucket
               db-user:
                  type: configuration(string)
                  name: Database user
@@ -89,16 +105,16 @@ application:
                  name: Database password
               privileges:
                  type: configuration(list<string>)
-                 name: User privileges
+                 name: Database user privileges
               db-sql-url:
                  type: configuration(list<string>)
-                 name: Url to sql for db schema and content
+                 name: Database init script
               lib-uri:
                  type: configuration(list<string>)
-                 name: Lib Url
+                 name: Additional libraries
               recipe-url:
                  type: configuration(string)
-                 name: Chef Cookbooks Url
+                 name: Chef cookbooks
             mysql: # Signals which we send/receive to Database submodule
               dbms:
                  type: consume-signal(object)  # This type mean we receive signal which value will be a object on that pin
@@ -113,42 +129,42 @@ application:
                  type: send-command(string db-user, string db-user-password, list<string> db-user-privileges => object connection) # 
               db:
                  type: send-command(string db-name, string db-action)
-                 name: Database create/drop
+                 name: Database schema management
               user:
                  type: send-command(list<string> app-hosts, string db-name, string db-user, string db-user-password, list<string> db-user-privileges, string user-action)
-                 name: DB user management
+                 name: Database user management
               file-query:
                  type: send-command(object connection, list<string> sql-url)
-                 name: Run sql query
+                 name: Run SQL query
             solr-zoo: # Signals which we send/receive to Solr submodule
               solr-url:
                  type: consume-signal(list<string>)
-                 name: Solr urls list
+                 name: Solr API
               solr-zoo-nodes:
                  type: consume-signal(string)
                  name: Zookeeper hosts
               zoo-ui:
                  type: consume-signal(list<string>)
-                 name: Zookeeper UI url
+                 name: Zookeeper UI
             tomcat: # Signals which we send/receive to Application Server submodule
               build-app:
                  type: send-command(string scm-provider, string git-uri, string app-branch => list<string> wars )
-                 name: Maven Build Tomcat action
+                 name: Build with Maven
               deploy-libs:
                  type: send-command(list<string> lib-uri)
-                 name: Libs deployment Tomcat  action 
+                 name: Deploy libraries
               deploy-war:
                  type: send-command(string uri, string path, object context-attrs, object context-nodes)
-                 name: Deploy war/jar action
+                 name: Deploy war/jar
               reconfigure:
                  type: send-command(string java-opts)
-                 name: restart Tomcat with new JAVA_OPTS
+                 name: Restart Tomcat
               manage-service:
                  type: send-command(string service-action)
-                 name: Manage Service Tomcat action
+                 name: Manage service
               app-hosts:
                  type: consume-signal(list<string>)
-                 name: Application Hosts
+                 name: Application hosts
               app-port:
                  type: consume-signal(int)
                  name: Application port
@@ -162,10 +178,10 @@ application:
             result: # Signals which we publish on App dashboard
               entry-url:
                  type: publish-signal(string)
-                 name: Broadleaf DemoSite
+                 name: Broadleaf demo site
               entry-admin-url:
                  type: publish-signal(string)
-                 name: Broadleaf Admin Panel
+                 name: Broadleaf admin panel
 
           required: [mysql, tomcat, haproxy , solr-zoo] # We don't continue without signals on required interfaces. In this case we are waiting tomcat, mysql and solr+zookeeper hosts return values
            # Static constants #
@@ -533,7 +549,7 @@ application:
               destroy:
                 steps: []
 #Submodules Definition
-    db:
+    Database:
       type: reference.Submodule
       configuration:
         __locator.application-id: "Database"
@@ -541,7 +557,7 @@ application:
         input:
           db-port:
              type: configuration(int)
-             name: Database listen port
+             name: Database port
           db-root-password:
              type: configuration(string)
              name: Database root password
@@ -552,27 +568,27 @@ application:
         mysql:
           schema:
              type: receive-command(string db-user, string db-user-password, list<string> db-user-privileges => object connection)
-             name: Manage Schema
+             name: Manage schema
           db:
              type: receive-command(string db-name, string db-action)
-             name: Database Management
+             name: Manage DB
           user:
              type: receive-command(list<string> app-hosts, string db-name, string db-user, string db-user-password, list<string> db-user-privileges, string user-action)
-             name: User Management
+             name: Manage users
           file-query:
              type: receive-command(object connection, list<string> sql-url)
-             name: Run Sql Query
+             name: Run a SQL query
           dbms:
              type: publish-signal(object)
-             name: Database Parameters
+             name: Database parameters
           db-port:
              type: publish-signal(int)
-             name: Database listen port
+             name: Database port
           db-host:
              type: publish-signal(string)
-             name: Database Host
+             name: Database host
 
-    app:
+    AppServer:
       type: reference.Submodule
       configuration:
         __locator.application-id: "Application Server"
@@ -580,6 +596,7 @@ application:
         input:
           operating-system:
               type: configuration(map<string,object>)
+              name: Operating system
               suggestions:
                   "centos": {image: "us-east-1/ami-bf5021d6", identity: root}
                   "amazon": {image: "us-east-1/ami-1ba18d72", identity: ec2-user}
@@ -590,31 +607,31 @@ application:
               name: EC2 instance type
           quantity:
               type: configuration(int)
-              name: Appliction hosts quantity
+              name: No. of application hosts
         tomcat:
           build-app:
               type: receive-command(string scm-provider, string git-uri, string app-branch => list<string> wars)
-              name: Maven Build
+              name: Build with Maven
           deploy-libs:
               type: receive-command(list<string> lib-uri)
-              name: Deploy Libs
+              name: Deploy libraries
           deploy-war:
               type: receive-command(string uri, string path, object context-attrs, object context-nodes)
-              name: Deploy war/jar
+              name: Deploy a war/jar
           reconfigure:
               type: receive-command(string java-opts)
               name: Reconfigure Tomcat
           manage-service:
               type: receive-command(string service-action)
-              name: Manage Service
+              name: Manage service
           app-hosts:
               type: publish-signal(list<string>)
-              name: Broadleaf Application Hosts
+              name: Broadleaf hosts
           app-port:
               type: publish-signal(int)
-              name: Appliction listen port
+              name: Broadleaf port
 
-    lb:
+    LoadBalancer:
       type: reference.Submodule
       configuration:
         __locator.application-id: "Load Balancer"
@@ -622,15 +639,15 @@ application:
         haproxy:
           add-servers:
               type: receive-command(list<string> app-hosts, int app-port, string lb-bucket => string entry-url)
-              name: Add Servers
+              name: Add servers
           reconfigure-servers:
               type: receive-command(list<string> app-hosts, int app-port, string lb-bucket)
-              name: Reconfigure Servers
+              name: Reconfigure servers
           lb-stats:
               type: publish-signal(object)
-              name: Haproxy statistics
+              name: HAProxy parameters
 
-    solr:
+    Solr:
       type: reference.Submodule
       configuration:
          __locator.application-id: "Solr Cloud"
@@ -645,10 +662,10 @@ application:
         solr-zoo:
           solr-zoo-nodes:
               type: publish-signal(string)
-              name: Zoo hosts Private IPs
+              name: Zookeeper hosts (private)
           zoo-ui:
               type: publish-signal(list<string>)
-              name: Exhibitiors UI Urls
+              name: Exhibitors UI
           solr-url:
               type: publish-signal(list<string>)
-              name: Solr Urls
+              name: Solr API
