@@ -10,3 +10,5 @@ Berksfile.lock
 berks/
 .kitchen/
 *.bak
+.lime-env/
+report.xml

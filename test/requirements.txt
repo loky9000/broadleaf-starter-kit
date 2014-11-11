@@ -2,4 +2,6 @@ simplejson
 pyaml
 requests
 testtools
-qubell-api-python-client
+PyYAML
+nose
+nose_xunitmp

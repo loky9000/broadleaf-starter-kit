@@ -1,11 +1,9 @@
 import os
 import requests
 
-from qubell.api.private.testing import environment, instance, values
+from qubell.api.testing import *
 from qubell.api.tools import retry
 from testtools import skip
-
-from test_runner import BaseComponentTestCase
 
 
 def eventually(*exceptions):
