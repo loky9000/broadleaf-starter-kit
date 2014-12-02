@@ -3,7 +3,7 @@ kit:
   link: https://github.com/qubell-bazaar/broadleaf-starter-kit
   applications:
     - name: "Broadleaf"
-      manifest: https://raw.github.com/qubell-bazaar/broadleaf-starter-kit/1.1-34p/broadleaf-starter-kit.yml
+      manifest: https://raw.github.com/qubell-bazaar/broadleaf-starter-kit/1.2-35p/broadleaf-starter-kit.yml
     - name: "Database"
       manifest: https://raw.github.com/qubell-bazaar/component-mysql-dev/1.0-34p/component-mysql-dev.yml
     - name: "Load Balancer"
