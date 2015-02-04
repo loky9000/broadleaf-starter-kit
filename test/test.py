@@ -19,49 +19,17 @@ def check_site(instance):
     # Check we have 2 hosts up
     @eventually(AssertionError, KeyError)
     def eventually_assert():
-        assert len(instance.returnValues['endpoints.demosite'])
+        assert len(instance.returnValues['broadleaf.BroadleafUrls'])
     eventually_assert()
 
-    # Check site still alive
-    url = instance.returnValues['endpoints.demosite']
-    resp = requests.get(url)
-    assert resp.status_code == 200
+    # Check site still alive    
+    urls = instance.returnValues['broadleaf.BroadleafUrls']
+    for url in urls:
+        resp = requests.get(url)
+        assert resp.status_code == 200
 
 @environment({
-    "default": {},
-    "AmazonEC2_CentOS_63": {
-        "policies": [{
-            "action": "provisionVms",
-            "parameter": "imageId",
-            "value": "us-east-1/ami-bf5021d6"
-        }, {
-            "action": "provisionVms",
-            "parameter": "vmIdentity",
-            "value": "root"
-        }]
-  },
-    "AmazonEC2_Ubuntu_1204": {
-        "policies": [{
-            "action": "provisionVms",
-            "parameter": "imageId",
-            "value": "us-east-1/ami-967edcff"
-        }, {
-            "action": "provisionVms",
-            "parameter": "vmIdentity",
-            "value": "ubuntu"
-        }]
-  },
-    "AmazonEC2_Ubuntu_1004": {
-        "policies": [{
-            "action": "provisionVms",
-            "parameter": "imageId",
-            "value": "us-east-1/ami-9f3906f6"
-        }, {
-            "action": "provisionVms",
-            "parameter": "vmIdentity",
-            "value": "ubuntu"
-        }]
-  }
+    "default": {}
 })
 class BroadleafTestCase(BaseComponentTestCase):
     name = "broadleaf-starter-kit"
@@ -78,17 +46,18 @@ class BroadleafTestCase(BaseComponentTestCase):
         return 240
 
     @instance(byApplication=name)
-    @values({"lb-host": "host"})
-    def test_host(self, instance, host):
-	resp = requests.get("http://" + host, verify=False)
+    def test_host(self, instance):
+        urls = instance.returnValues['broadleaf.BroadleafUrls'] 
 
-        assert resp.status_code == 200
+        for url in urls:	
+            resp = requests.get(url, verify=False)
+            assert resp.status_code == 200
 
     @instance(byApplication=name)
-    @values({"db-port": "port", "db-host": "host"})
-    def test_db_port(self, instance, host, port):
+    def test_db_port(self, instance):
         import socket
-
+        host = instance.returnValues['broadleaf.DB']['db-host']
+        port = instance.returnValues['broadleaf.DB']['db-port']
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         result = sock.connect_ex((host, port))
 
@@ -96,7 +65,7 @@ class BroadleafTestCase(BaseComponentTestCase):
     
     @instance(byApplication=name)
     def test_solr_search(self, instance):
-         hosts = instance.returnValues['endpoints.solr-url']
+         hosts = instance.returnValues['broadleaf.Solr-urls']
          
          for host in hosts:
 	     resp = requests.get(host + "/select/?q=*:*", verify=False)
@@ -108,8 +77,8 @@ class BroadleafTestCase(BaseComponentTestCase):
 
     @instance(byApplication=name)
     def test_scaling(self, instance):
-        assert len(instance.returnValues['endpoints.app']) == 1
-        params = {'input.app-quantity': '2'}
+        assert len(instance.returnValues['broadleaf.Application_hosts']) == 1
+        params = {'configuration.clusterSize': '2'}
         instance.reconfigure(parameters=params)
         assert instance.ready(timeout=45)
 
@@ -117,6 +86,6 @@ class BroadleafTestCase(BaseComponentTestCase):
         # Check we have 2 hosts up
         @eventually(AssertionError, KeyError)
         def eventually_assert():
-            assert len(instance.returnValues['endpoints.app']) == 2
+            assert len(instance.returnValues['broadleaf.Application_hosts']) == 2
         eventually_assert()
 
