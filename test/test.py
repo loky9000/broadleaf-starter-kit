@@ -65,10 +65,11 @@ def check_site(instance):
 })
 class BroadleafTestCase(BaseComponentTestCase):
     name = "broadleaf-starter-kit"
-    meta = "https://raw.githubusercontent.com/qubell-bazaar/broadleaf-starter-kit/master/meta.yml"  
+    meta = os.path.realpath(os.path.join(os.path.dirname(__file__), '../meta.yml')) 
+    destroy_interval = int(os.environ.get('DESTROY_INTERVAL', 1000*60*60*2))
     apps = [{
         "name": name,
-        "settings": {"destroyInterval": 14400000},
+        "settings": {"destroyInterval": destroy_interval},
         "file": os.path.realpath(os.path.join(os.path.dirname(__file__), '../%s.yml' % name))
    }]
 

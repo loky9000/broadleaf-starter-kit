@@ -85,9 +85,6 @@ application:
               db-name:
                  type: configuration(string) # It's a pin with configuration type and value will be a string
                  name: MySQL database name 
-              scm-provider:
-                 type: configuration(string)
-                 name: SCM provider (Git, Subversion etc)
               app-fork:
                  type: configuration(string)
                  name: Git fork
@@ -148,7 +145,7 @@ application:
                  name: Zookeeper UI
             tomcat: # Signals which we send/receive to Application Server submodule
               build-app:
-                 type: send-command(string scm-provider, string git-uri, string app-branch => list<string> wars )
+                 type: send-command(string git-uri, string app-branch => list<string> wars )
                  name: Build with Maven
               deploy-libs:
                  type: send-command(list<string> lib-uri)
@@ -190,7 +187,6 @@ application:
             input.db-password: broadleaf #const
             input.privileges: ["all"] #const
             input.db-sql-url: ["https://raw.github.com/qubell-bazaar/DemoSite/solr-cloud/core/src/main/resources/sql/schema.sql", "https://raw.github.com/qubell-bazaar/DemoSite/solr-cloud/core/src/main/resources/sql/load_full.sql"]
-            input.scm-provider: git #const
             input.lib-uri: ["http://repo1.maven.org/maven2/org/apache/tomcat/dbcp/6.0.26/dbcp-6.0.26.jar", "http://repo1.maven.org/maven2/mysql/mysql-connector-java/5.1.6/mysql-connector-java-5.1.6.jar"]
             
             configuration.triggers: # Trigger call corresponded workflow when values changed
@@ -254,7 +250,6 @@ application:
                       parameters:
                         retryCount: 3
                         commandCallTimeout: 10 minutes
-                        scm-provider: "{$.scm-provider}"
                         git-uri: "git://github.com/{$.app-fork}/DemoSite.git"
                         app-branch: "{$.app-branch}"
                       output:
@@ -275,7 +270,7 @@ application:
                   - deploy-libs: # Deploy libs required for application
                       action: tomcat.deploy-libs
                       phase: deploy-libs
-                      precedingPhases: [ build-app ]
+                      precedingPhases: [ add-solr-support ]
                       parameters:
                         commandCallTimeout: 10 minutes
                         lib-uri: "{$.lib-uri}"
@@ -291,7 +286,7 @@ application:
                       phase: deploy-war
                       precedingPhases: [ build-app, add-solr-support, reconfigure-tomcat ]
                       parameters:
-                        commandCallTimeout: 10 minutes
+                        commandCallTimeout: 20 minutes
                         uri: "{$.warlist[1]}"
                         path: "/"
                         context-attrs: {}
@@ -301,7 +296,7 @@ application:
                       phase: deploy-admin-war
                       precedingPhases: [ deploy-war ]
                       parameters:
-                        commandCallTimeout: 14 minutes
+                        commandCallTimeout: 20 minutes
                         uri: "{$.warlist[0]}"
                         path: "/admin"
                         context-attrs: {}
@@ -359,7 +354,6 @@ application:
                       parameters:
                         retryCount: 3
                         commandCallTimeout: 10 minutes
-                        scm-provider: "{$.scm-provider}"
                         git-uri: "git://github.com/{$.app-fork}/DemoSite.git"
                         app-branch: "{$.app-branch}"
                       output:
@@ -380,7 +374,7 @@ application:
                   - deploy-libs: # Deploy libs required for application
                       action: tomcat.deploy-libs
                       phase: deploy-libs
-                      precedingPhases: [ build-app ]
+                      precedingPhases: [ add-solr-support ]
                       parameters:
                         commandCallTimeout: 10 minutes
                         lib-uri: "{$.lib-uri}"
@@ -403,7 +397,7 @@ application:
                       phase: deploy-war
                       precedingPhases: [ build-app, add-solr-support, reconfigure-tomcat, wait-after-reconfigure ]
                       parameters:
-                        commandCallTimeout: 10 minutes
+                        commandCallTimeout: 20 minutes
                         uri: "{$.warlist[1]}"
                         path: "/"
                         context-attrs: {}
@@ -413,7 +407,7 @@ application:
                       phase: deploy-admin-war
                       precedingPhases: [ deploy-war ]
                       parameters:
-                        commandCallTimeout: 14 minutes
+                        commandCallTimeout: 20 minutes
                         uri: "{$.warlist[0]}"
                         path: "/admin"
                         context-attrs: {}
@@ -451,7 +445,6 @@ application:
                       parameters:
                         retryCount: 3
                         commandCallTimeout: 10 minutes
-                        scm-provider: "{$.scm-provider}"
                         git-uri: "git://github.com/{$.app-fork}/DemoSite.git"
                         app-branch: "{$.app-branch}"
                       output:
@@ -474,7 +467,7 @@ application:
                       phase: deploy-war
                       precedingPhases: [ add-solr-support ]
                       parameters:
-                        commandCallTimeout: 10 minutes
+                        commandCallTimeout: 20 minutes
                         uri: "{$.warlist[1]}"
                         path: "/"
                         context-attrs: {}
@@ -484,7 +477,7 @@ application:
                       phase: deploy-admin-war
                       precedingPhases: [ deploy-war ]
                       parameters:
-                        commandCallTimeout: 14 minutes
+                        commandCallTimeout: 20 minutes
                         uri: "{$.warlist[0]}"
                         path: "/admin"
                         context-attrs: {}
@@ -553,7 +546,7 @@ application:
               name: No. of application hosts
         tomcat:
           build-app:
-              type: receive-command(string scm-provider, string git-uri, string app-branch => list<string> wars)
+              type: receive-command(string git-uri, string app-branch => list<string> wars)
               name: Build with Maven
           deploy-libs:
               type: receive-command(list<string> lib-uri)
