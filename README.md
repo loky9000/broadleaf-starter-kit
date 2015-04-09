@@ -1,10 +1,10 @@
 broadleaf-starter-kit
 ===================
 
-Version 1.2-35p
+Version 1.3-39p
 ---------------
 
-[![Install](https://raw.github.com/qubell-bazaar/component-skeleton/master/img/install.png)](https://express.qubell.com/applications/upload?metadataUrl=https://raw.github.com/qubell-bazaar/broadleaf-starter-kit/1.2-35p/meta.yml)
+[![Install](https://raw.github.com/qubell-bazaar/component-skeleton/master/img/install.png)](https://express.qubell.com/applications/upload?metadataUrl=https://raw.github.com/qubell-bazaar/broadleaf-starter-kit/1.3-39p/meta.yml)
 
 ![](http://www.broadleafcommerce.com/img/broadleaf_logo_white.png)
 ![](http://tomcat.apache.org/images/tomcat-power.gif)
