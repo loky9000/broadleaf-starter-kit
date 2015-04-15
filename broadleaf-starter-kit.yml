@@ -237,7 +237,7 @@ application:
                   action: db.schema
                   precedingPhases: [ get-signals ]
                   parameters:
-                    commandCallTimeout: 5 minutes
+                    commandCallTimeout: 10 minutes
                     db-user: "{$.db-user}"
                     db-user-password: "{$.db-password}"
                     db-user-privileges: "{$.privileges}"
