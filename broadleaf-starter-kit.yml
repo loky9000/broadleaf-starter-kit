@@ -314,7 +314,6 @@ application:
       interfaces:
         compute: *compute
         servers:
-          app-host: consume-signal(string)
           app-uri: consume-signal(list<string>)
         haproxy:
           stats-url: { type: publish-signal(string), name: Haproxy statistics }

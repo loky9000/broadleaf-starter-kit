@@ -7,7 +7,7 @@ kit:
     - name: "Database"
       manifest: https://raw.github.com/qubell-bazaar/component-mysql-dev/2.0-36p/component-mysql-dev.yml
     - name: "Load Balancer"
-      manifest: https://raw.github.com/qubell-bazaar/component-haproxy/2.2-39p/component-haproxy.yml
+      manifest: https://raw.github.com/qubell-bazaar/component-haproxy/2.2.1-39p/component-haproxy.yml
     - name: "Application Server"
       manifest: https://raw.github.com/qubell-bazaar/component-tomcat-dev/2.3-39p/component-tomcat-dev.yml
     - name: "Solr Cloud"
